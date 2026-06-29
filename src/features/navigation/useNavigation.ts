@@ -37,7 +37,12 @@ export function useNavigation() {
     })
   }, [])
 
-  return { path, push, pop }
+  const reset = useCallback(() => {
+    setPath([])
+    replaceHistoryPath([])
+  }, [])
+
+  return { path, push, pop, reset }
 }
 
 const replaceHistoryPath = (path: string[]) => {

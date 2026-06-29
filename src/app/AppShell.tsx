@@ -6,6 +6,8 @@ import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { useNavigation } from '../features/navigation/useNavigation'
 import { indexedDbTreeStorage, type TreeStorage } from '../features/persistence/treeStorage'
+import { exportTreeToJson, importTreeFromJson } from '../features/persistence/treeTransfer'
+import { SettingsSheet } from '../features/settings/SettingsSheet'
 import {
   addNode,
   childrenOf,
@@ -31,8 +33,10 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const [tree, setTree] = useState<TreeState>(initialTree)
   const [hasHydrated, setHasHydrated] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
   const [undoState, setUndoState] = useState<TreeState | null>(null)
-  const { path, push, pop } = useNavigation()
+  const { path, push, pop, reset } = useNavigation()
   const prefersReducedMotion = useReducedMotion()
   const currentId = path.at(-1) ?? null
   const currentNode = currentId ? tree.nodes[currentId] : null
@@ -118,9 +122,43 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     setUndoState(null)
   }
 
+  const exportTree = () => {
+    const blob = new Blob([exportTreeToJson(tree)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `zhixing-${new Date().toISOString().slice(0, 10)}.json`
+    document.body.append(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const importTree = async (file: File) => {
+    try {
+      const importedTree = importTreeFromJson(await file.text())
+      setTree(importedTree)
+      setUndoState(null)
+      setEditingId(null)
+      setImportError(null)
+      setIsSettingsOpen(false)
+      reset()
+    } catch {
+      setImportError(STRINGS.importFailed)
+    }
+  }
+
   return (
     <main className={styles.shell} aria-label={STRINGS.appName}>
-      <Header title={currentNode?.title ?? null} canGoBack={path.length > 0} onBack={pop} />
+      <Header
+        title={currentNode?.title ?? null}
+        canGoBack={path.length > 0}
+        onBack={pop}
+        onSettings={() => {
+          setImportError(null)
+          setIsSettingsOpen(true)
+        }}
+      />
       <AnimatePresence mode="wait">
         <motion.section
           animate={{ opacity: 1, y: 0 }}
@@ -157,6 +195,14 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
             {STRINGS.undo}
           </button>
         </div>
+      ) : null}
+      {isSettingsOpen ? (
+        <SettingsSheet
+          importError={importError}
+          onClose={() => setIsSettingsOpen(false)}
+          onExport={exportTree}
+          onImportFile={(file) => void importTree(file)}
+        />
       ) : null}
     </main>
   )

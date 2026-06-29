@@ -81,6 +81,33 @@ test('keeps added cards after reload', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
 })
 
+test('imports a JSON tree from settings', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '设置' }).click()
+  await page.getByLabel('导入 JSON').setInputFiles({
+    name: 'zhixing.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(
+      JSON.stringify({
+        version: 1,
+        rootIds: ['imported'],
+        nodes: {
+          imported: {
+            id: 'imported',
+            title: '导入项目',
+            childIds: [],
+            createdAt: 100,
+          },
+        },
+      }),
+    ),
+  })
+
+  await expect(page.getByRole('button', { exact: true, name: '导入项目' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeHidden()
+})
+
 async function dragBetween(page: Page, source: Locator, target: Locator) {
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()

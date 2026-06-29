@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M4 - IndexedDB/local-first persistence complete; import/export is next.
+M4 - local-first persistence and JSON import/export complete; reset/clear-local-data is next.
 
 ## Current Status
 
@@ -19,26 +19,29 @@ M3 added local editing interactions: inline card creation, edit sheet, delete
 confirmation, single-step undo, same-level drag reorder through `dnd-kit`, and
 cross-parent reparent through the edit sheet. M4 added IndexedDB-backed local-first
 persistence for the tree, with first-run seed fallback and validation before
-loading stored state.
+loading stored state. M4 now also includes settings-sheet JSON export/import that
+reuses the v1 tree schema, resets navigation after successful import, and keeps the
+current tree unchanged when import validation fails.
 
 ## Verification
 
-- `pnpm exec prettier --check <changed files>` - passed.
+- `pnpm exec prettier --write <changed files>` - passed.
 - Project-wide `pnpm exec prettier --check .` still reports existing formatting issues
   in `SPEC.md`, `playwright.config.ts`, and `pnpm-lock.yaml`; they were left untouched
   to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 75 tests across 17 files.
-- `pnpm test:coverage` - passed: 90.9% statements, 83.26% branches, 91.33%
-  functions, 91.35% lines.
+- `pnpm test` - passed: 84 tests across 19 files.
+- `pnpm test:coverage` - passed: 91.23% statements, 81.91% branches, 90.71%
+  functions, 91.63% lines.
 - `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 6 specs across Chromium and mobile Safari profile, 12 total
+- `pnpm e2e` - passed: 7 specs across Chromium and mobile Safari profile, 14 total
   browser checks.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
-- Git commits exist through M3 reparent; M4 IndexedDB persistence is ready to commit.
+- Git commits exist through M4 IndexedDB persistence; M4 import/export is implemented
+  and verified for the next commit.
 
 ## Active Decisions
 
@@ -67,9 +70,13 @@ loading stored state.
 - AppShell does not save until storage hydration completes, so first-run seed state
   does not overwrite an existing stored tree.
 - Invalid stored payloads are ignored via the existing tree schema/invariant validator.
+- JSON export writes the same v1 storage payload used by persistence.
+- JSON import accepts only validated v1 tree payloads; malformed or invalid files
+  show an error and do not mutate the current tree.
+- Successful import clears undo/edit state and resets navigation to the root level.
 
 ## Next Steps
 
-1. Commit M4 IndexedDB persistence.
-2. Add import/export using the existing v1 tree schema.
-3. Add a small reset/clear-local-data path after import/export is in place.
+1. Commit M4 JSON import/export.
+2. Add a small reset/clear-local-data path.
+3. Start the next product slice after the local data management path is complete.

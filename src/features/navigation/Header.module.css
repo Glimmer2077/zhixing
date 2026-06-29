@@ -49,10 +49,6 @@
   color: var(--text-2);
 }
 
-.settings:disabled {
-  opacity: 1;
-}
-
 .back:focus-visible,
 .settings:focus-visible {
   outline: 2px solid var(--ink);

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
 import { createMemoryTreeStorage } from '../features/persistence/treeStorage'
+import { exportTreeToJson } from '../features/persistence/treeTransfer'
 import type { TreeState } from '../features/tree/types'
 
 const persistedTree: TreeState = {
@@ -49,5 +50,74 @@ describe('AppShell', () => {
         ),
       ).toBe(true)
     })
+  })
+
+  it('imports a tree from settings', async () => {
+    const user = userEvent.setup()
+    render(<AppShell storage={createMemoryTreeStorage()} />)
+
+    await user.click(screen.getByRole('button', { name: '设置' }))
+    await user.upload(
+      screen.getByLabelText('导入 JSON'),
+      new File([exportTreeToJson(persistedTree)], 'zhixing.json', { type: 'application/json' }),
+    )
+
+    expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '工作' })).not.toBeInTheDocument()
+  })
+
+  it('exports the current tree from settings', async () => {
+    const user = userEvent.setup()
+    const createObjectUrl = vi.fn(() => 'blob:zhixing')
+    const revokeObjectUrl = vi.fn()
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+    const originalCreateObjectUrl = Object.getOwnPropertyDescriptor(URL, 'createObjectURL')
+    const originalRevokeObjectUrl = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL')
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: createObjectUrl,
+    })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: revokeObjectUrl,
+    })
+
+    try {
+      render(<AppShell storage={createMemoryTreeStorage()} />)
+
+      await user.click(screen.getByRole('button', { name: '设置' }))
+      await user.click(screen.getByRole('button', { name: '导出 JSON' }))
+
+      expect(createObjectUrl).toHaveBeenCalledWith(expect.any(Blob))
+      expect(click).toHaveBeenCalledTimes(1)
+      expect(revokeObjectUrl).toHaveBeenCalledWith('blob:zhixing')
+    } finally {
+      if (originalCreateObjectUrl) {
+        Object.defineProperty(URL, 'createObjectURL', originalCreateObjectUrl)
+      } else {
+        Reflect.deleteProperty(URL, 'createObjectURL')
+      }
+
+      if (originalRevokeObjectUrl) {
+        Object.defineProperty(URL, 'revokeObjectURL', originalRevokeObjectUrl)
+      } else {
+        Reflect.deleteProperty(URL, 'revokeObjectURL')
+      }
+      click.mockRestore()
+    }
+  })
+
+  it('keeps the current tree when import fails', async () => {
+    const user = userEvent.setup()
+    render(<AppShell storage={createMemoryTreeStorage()} />)
+
+    await user.click(screen.getByRole('button', { name: '设置' }))
+    await user.upload(
+      screen.getByLabelText('导入 JSON'),
+      new File(['not json'], 'bad.json', { type: 'application/json' }),
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('导入失败')
+    expect(screen.getByRole('button', { name: '工作' })).toBeInTheDocument()
   })
 })
