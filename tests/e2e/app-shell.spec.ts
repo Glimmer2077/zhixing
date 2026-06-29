@@ -68,6 +68,19 @@ test('moves a child card to the root level', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '深度工作' })).toBeVisible()
 })
 
+test('keeps added cards after reload', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '添加领域' }).click()
+  await page.getByLabel('新卡片标题').fill('长期项目')
+  await page.getByLabel('新卡片标题').press('Enter')
+  await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
+
+  await page.reload()
+
+  await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
+})
+
 async function dragBetween(page: Page, source: Locator, target: Locator) {
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()

@@ -1,10 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { CardGrid } from '../features/cards/CardGrid'
 import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { useNavigation } from '../features/navigation/useNavigation'
+import { indexedDbTreeStorage, type TreeStorage } from '../features/persistence/treeStorage'
 import {
   addNode,
   childrenOf,
@@ -21,9 +22,14 @@ import type { EditableNodePatch, TreeState } from '../features/tree/types'
 import { STRINGS } from '../strings'
 import styles from './AppShell.module.css'
 
-export function AppShell() {
+interface AppShellProps {
+  storage?: TreeStorage
+}
+
+export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {}) {
   const initialTree = useMemo<TreeState>(() => createSeedTree(), [])
   const [tree, setTree] = useState<TreeState>(initialTree)
+  const [hasHydrated, setHasHydrated] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [undoState, setUndoState] = useState<TreeState | null>(null)
   const { path, push, pop } = useNavigation()
@@ -35,6 +41,39 @@ export function AppShell() {
   const parentOptions = editingId ? parentOptionsFor(tree, editingId) : []
   const visibleNodes = childrenOf(tree, currentId)
   const screenKey = currentId ?? 'root'
+
+  useEffect(() => {
+    let isActive = true
+
+    storage
+      .load()
+      .then((storedTree) => {
+        if (!isActive) {
+          return
+        }
+        if (storedTree) {
+          setTree(storedTree)
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (isActive) {
+          setHasHydrated(true)
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [storage])
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return
+    }
+
+    void storage.save(tree).catch(() => undefined)
+  }, [hasHydrated, storage, tree])
 
   const addCard = (title: string) => {
     setUndoState(null)

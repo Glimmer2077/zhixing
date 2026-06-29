@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M3 - Editing gestures complete; M4 persistence is next.
+M4 - IndexedDB/local-first persistence complete; import/export is next.
 
 ## Current Status
 
@@ -17,8 +17,9 @@ Git has been initialized for the project. M1 added the pure tree/domain layer
 with tests before UI work. M2 added the read-only card browsing UI over the seed.
 M3 added local editing interactions: inline card creation, edit sheet, delete
 confirmation, single-step undo, same-level drag reorder through `dnd-kit`, and
-cross-parent reparent through the edit sheet. Edits still live in React state
-only; persistence remains deferred.
+cross-parent reparent through the edit sheet. M4 added IndexedDB-backed local-first
+persistence for the tree, with first-run seed fallback and validation before
+loading stored state.
 
 ## Verification
 
@@ -28,17 +29,16 @@ only; persistence remains deferred.
   to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 70 tests across 16 files.
-- `pnpm test:coverage` - passed: 91.82% statements, 83.47% branches, 91.96%
-  functions, 92.17% lines.
+- `pnpm test` - passed: 75 tests across 17 files.
+- `pnpm test:coverage` - passed: 90.9% statements, 83.26% branches, 91.33%
+  functions, 91.35% lines.
 - `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 5 specs across Chromium and mobile Safari profile, 10 total
+- `pnpm e2e` - passed: 6 specs across Chromium and mobile Safari profile, 12 total
   browser checks.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
-- Git commits exist through M3 same-level drag reorder; cross-parent reparent is
-  ready to commit.
+- Git commits exist through M3 reparent; M4 IndexedDB persistence is ready to commit.
 
 ## Active Decisions
 
@@ -62,9 +62,14 @@ only; persistence remains deferred.
   from valid targets.
 - Full drag-to-parent interactions are deferred until the UI has a multi-level move
   surface.
+- M4 persistence uses a small `TreeStorage` interface with an IndexedDB implementation
+  powered by `idb-keyval`.
+- AppShell does not save until storage hydration completes, so first-run seed state
+  does not overwrite an existing stored tree.
+- Invalid stored payloads are ignored via the existing tree schema/invariant validator.
 
 ## Next Steps
 
-1. Commit cross-parent reparent.
-2. Start M4 persistence with IndexedDB/local-first storage.
-3. Add import/export after persistence stabilizes.
+1. Commit M4 IndexedDB persistence.
+2. Add import/export using the existing v1 tree schema.
+3. Add a small reset/clear-local-data path after import/export is in place.
