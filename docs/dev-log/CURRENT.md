@@ -7,7 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; settings polish is ready to commit.
+M5 - polish and acceptance QA in progress; PWA/offline app-shell coverage is ready
+to commit.
 
 ## Current Status
 
@@ -30,25 +31,29 @@ path did not. The current path now persists locally, reloads restore the current
 card level, and stale paths are reset to root after tree hydration.
 M5 settings polish adds import confirmation before replacing the tree, an iOS backup
 reminder beside export/import, and a concise about section.
+M5 PWA/offline QA adds a stable Playwright regression that verifies the generated
+service worker can keep the app shell visible when network requests fail. The
+WebKit reload interception limitation is documented in the test and skipped for
+that browser profile.
 
 ## Verification
 
-- `pnpm exec prettier --write <changed files>` - passed.
-- Project-wide `pnpm exec prettier --check .` still reports existing formatting issues
-  in `SPEC.md`, `playwright.config.ts`, and `pnpm-lock.yaml`; they were left untouched
-  to avoid unrelated churn.
-- `pnpm typecheck` - passed.
-- `pnpm lint` - passed.
-- `pnpm test` - passed: 93 tests across 20 files.
-- `pnpm test:coverage` - passed: 91.65% statements, 82.99% branches, 91.44%
+- `./node_modules/.bin/prettier --write tests/e2e/app-shell.spec.ts playwright.config.ts`
+  - passed.
+- `./node_modules/.bin/tsc -b --pretty false` - passed.
+- `./node_modules/.bin/eslint . --max-warnings=0` - passed.
+- `./node_modules/.bin/vitest run` - passed: 93 tests across 20 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 91.65% statements, 82.99% branches, 91.44%
   functions, 92% lines.
-- `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 9 specs across Chromium and mobile Safari profile, 18 total
-  browser checks.
+- `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
+- `CI= ./node_modules/.bin/playwright test` - passed: 19 browser checks, with the
+  PWA request-failure reload regression passing on Chromium and intentionally
+  skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
-- Git commits exist through M5 path persistence; M5 settings polish is implemented
+- `curl -I http://127.0.0.1:5173/` - returned 200 OK.
+- Git commits exist through M5 settings polish; M5 PWA/offline QA is implemented
   and verified for the next commit.
 
 ## Active Decisions
@@ -90,9 +95,13 @@ reminder beside export/import, and a concise about section.
   stale; stale or structurally invalid paths reset to root.
 - JSON import now requires a second confirmation click before replacing the tree.
 - Settings shows the iOS backup reminder from `SPEC.md` and a concise about section.
+- Playwright webServer invokes the local Vite binary directly instead of `pnpm preview`
+  so e2e runs do not trigger an interactive pnpm `node_modules` rebuild prompt.
+- `.pnpm-store/` is ignored because pnpm can create it as local cache during tooling
+  runs.
 
 ## Next Steps
 
-1. Commit M5 settings polish.
-2. Continue M5 acceptance QA for PWA/offline/safe-area/a11y/motion.
+1. Commit M5 PWA/offline QA.
+2. Continue M5 acceptance QA for safe-area/a11y/motion.
 3. Decide whether to add appearance controls before final v1 QA.

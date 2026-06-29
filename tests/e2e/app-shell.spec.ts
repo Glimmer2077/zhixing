@@ -6,6 +6,28 @@ test('shows the wordmark', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
 })
 
+test('loads the app shell when network requests fail', async ({ browserName, context, page }) => {
+  test.skip(
+    browserName !== 'chromium',
+    'Playwright WebKit blocks intercepted reloads before the service worker fallback can be asserted.',
+  )
+
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
+
+  await waitForServiceWorkerControl(page)
+  await page.reload()
+  await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
+
+  await context.route('**/*', (route) => route.abort())
+  try {
+    await page.reload()
+    await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
+  } finally {
+    await context.unroute('**/*')
+  }
+})
+
 test('drills into the seed tree and returns', async ({ page }) => {
   await page.goto('/')
 
@@ -169,4 +191,36 @@ async function cardOrder(page: Page, first: string, second: string) {
     return `${first}-first`
   }
   return `${second}-first`
+}
+
+async function waitForServiceWorkerControl(page: Page) {
+  await page.evaluate(`
+    (async () => {
+      if (!('serviceWorker' in navigator)) {
+        throw new Error('Service workers are unavailable')
+      }
+
+      await navigator.serviceWorker.ready
+      if (navigator.serviceWorker.controller) {
+        return
+      }
+
+      await new Promise((resolve, reject) => {
+        let timeout
+        const handleControllerChange = () => {
+          clearTimeout(timeout)
+          resolve()
+        }
+
+        timeout = setTimeout(() => {
+          navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+          reject(new Error('Service worker did not control the page'))
+        }, 5000)
+
+        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange, {
+          once: true,
+        })
+      })
+    })()
+  `)
 }

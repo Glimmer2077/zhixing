@@ -6,21 +6,21 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:4173',
-    trace: 'on-first-retry'
+    trace: 'on-first-retry',
   },
   webServer: {
-    command: 'pnpm preview --host 127.0.0.1',
+    command: './node_modules/.bin/vite preview --host 127.0.0.1',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI
+    reuseExistingServer: !process.env.CI,
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'mobile-safari',
-      use: { ...devices['iPhone 15'] }
-    }
-  ]
+      use: { ...devices['iPhone 15'] },
+    },
+  ],
 })
