@@ -1,0 +1,156 @@
+.backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  background: rgba(20, 20, 20, 0.22);
+  padding: var(--s4);
+}
+
+.sheet {
+  display: grid;
+  gap: var(--s5);
+  width: min(520px, 100%);
+  margin-inline: auto;
+  padding: var(--s5);
+  border-radius: var(--r-sheet);
+  background: var(--canvas);
+  color: var(--text-1);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+}
+
+.header,
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.iconButton {
+  display: grid;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 24px;
+  place-items: center;
+}
+
+.form,
+.field,
+.optionGroup {
+  display: grid;
+  gap: var(--s3);
+}
+
+.field span,
+.optionGroup legend {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--s3);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-1);
+  font-size: 16px;
+}
+
+.optionGroup {
+  padding: 0;
+  border: 0;
+}
+
+.swatches,
+.markOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.swatchOption,
+.markOption {
+  display: contents;
+}
+
+.swatchOption input,
+.markOption input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.swatch,
+.markOption span {
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+}
+
+.markOption span {
+  padding: 0 var(--s3);
+  background: transparent;
+  color: var(--text-2);
+}
+
+.swatchOption input:checked + .swatch,
+.markOption input:checked + span {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.confirm {
+  display: grid;
+  gap: var(--s3);
+  padding: var(--s3);
+  border-radius: 12px;
+  background: rgba(103, 71, 70, 0.1);
+}
+
+.confirm p {
+  margin: 0;
+  color: var(--text-1);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.deleteButton,
+.deleteConfirm,
+.doneButton {
+  border: 0;
+  border-radius: var(--r-pill);
+  padding: 0 var(--s4);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.deleteButton,
+.deleteConfirm {
+  background: transparent;
+  color: #8c4a48;
+}
+
+.doneButton {
+  background: var(--ink);
+  color: var(--canvas);
+}

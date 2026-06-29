@@ -12,3 +12,29 @@
 .content {
   min-width: 0;
 }
+
+.toast {
+  position: fixed;
+  right: var(--s4);
+  bottom: calc(env(safe-area-inset-bottom) + var(--s4));
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  max-width: calc(100vw - var(--s8));
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 14px;
+}
+
+.toast button {
+  min-width: auto;
+  min-height: 32px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.16);
+  color: inherit;
+  font-weight: 500;
+}

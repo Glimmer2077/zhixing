@@ -22,19 +22,35 @@ const nodes: Node[] = [
 
 describe('CardGrid', () => {
   it('renders cards in a two-column grid with an add placeholder', () => {
-    render(<CardGrid nodes={nodes} addLabel="添加领域" onOpen={() => undefined} />)
+    render(
+      <CardGrid
+        nodes={nodes}
+        addLabel="添加领域"
+        onAdd={() => undefined}
+        onEdit={() => undefined}
+        onOpen={() => undefined}
+      />,
+    )
 
     const grid = screen.getByRole('list', { name: '卡片' })
     expect(within(grid).getByRole('button', { name: '工作' })).toBeInTheDocument()
     expect(within(grid).getByRole('button', { name: '日常' })).toBeInTheDocument()
-    expect(within(grid).getByRole('button', { name: '添加领域' })).toBeDisabled()
+    expect(within(grid).getByRole('button', { name: '添加领域' })).toBeEnabled()
   })
 
   it('renders the empty state when there are no nodes', () => {
-    render(<CardGrid nodes={[]} addLabel="添加" onOpen={() => undefined} />)
+    render(
+      <CardGrid
+        nodes={[]}
+        addLabel="添加"
+        onAdd={() => undefined}
+        onEdit={() => undefined}
+        onOpen={() => undefined}
+      />,
+    )
 
     expect(screen.getByText('还没有卡片')).toBeInTheDocument()
     expect(screen.getByText('点下面的「添加」，放进第一张。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '添加' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '添加' })).toBeEnabled()
   })
 })

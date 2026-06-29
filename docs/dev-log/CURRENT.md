@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M2 - Read UI complete. Next milestone is M3 - Editing.
+M3 - Editing core complete; drag reorder/reparent is the next M3 slice.
 
 ## Current Status
 
@@ -15,19 +15,26 @@ M0 created a minimal Vite + React + TypeScript app shell, testing/lint/build
 configuration, PWA scaffold, Playwright smoke test, and the development log system.
 Git has been initialized for the project. M1 added the pure tree/domain layer
 with tests before UI work. M2 added the read-only card browsing UI over the seed.
+M3 added the first local editing interactions: inline card creation, edit sheet,
+delete confirmation, and single-step undo. Edits still live in React state only;
+persistence remains deferred.
 
 ## Verification
 
-- `pnpm exec prettier --check package.json .prettierrc.json tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts eslint.config.js index.html public/manifest.webmanifest src tests docs/dev-log` - passed.
+- `pnpm exec prettier --check <changed files>` - passed.
+- Project-wide `pnpm exec prettier --check .` still reports existing formatting issues
+  in `SPEC.md`, `playwright.config.ts`, and `pnpm-lock.yaml`; they were left untouched
+  to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 58 tests across 14 files.
-- `pnpm test:coverage` - passed: 95.03% statements, 83.51% branches, 95.58%
-  functions, 95.17% lines.
+- `pnpm test` - passed: 65 tests across 16 files.
+- `pnpm test:coverage` - passed: 93.22% statements, 81.94% branches, 93.87%
+  functions, 93.47% lines.
 - `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 2 tests across Chromium and mobile Safari profile.
-- Security scan for `console.log`, `sk-`, `api_key`, and `apiKey` in source/config files returned no matches.
-- Git repository initialized and the M0 baseline has been committed.
+- `pnpm e2e` - passed: 3 specs across Chromium and mobile Safari profile, 6 total
+  browser checks.
+- `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
+- Git commits exist through M2; M3 editing core is ready to commit.
 
 ## Active Decisions
 
@@ -43,11 +50,11 @@ with tests before UI work. M2 added the read-only card browsing UI over the seed
 - M2 keeps editing, persistence, import/export UI, settings sheet, and drag/drop out of scope.
 - M2 add/settings affordances are visible placeholders and intentionally disabled until later
   milestones.
+- M3 first slice includes add, edit sheet, delete confirmation, and single-step undo.
+  Drag reorder/reparent remains the next M3 slice.
 
 ## Next Steps
 
-1. Commit M2 as `feat: add read-only card UI`.
-2. Start M3 with actual editing: add card, edit sheet, delete confirmation, undo toast, and
-   then drag reorder/reparent.
-3. Keep IndexedDB persistence and import/export UI for M4 unless M3 requires a minimal store
-   earlier.
+1. Commit the M3 editing core.
+2. Add drag reorder/reparent as the next M3 slice.
+3. Then start M4 persistence once editing gestures are stable.

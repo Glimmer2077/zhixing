@@ -38,6 +38,6 @@ describe('AppShell read UI', () => {
     await user.click(await screen.findByRole('button', { name: '深度工作' }))
 
     expect(await screen.findByText('还没有卡片')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '添加' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '添加' })).toBeEnabled()
   })
 })

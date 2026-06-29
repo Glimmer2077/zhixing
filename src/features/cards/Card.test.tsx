@@ -14,9 +14,10 @@ const node: Node = {
 
 describe('Card', () => {
   it('renders node title, subtitle, date, and mark', () => {
-    render(<Card node={node} onOpen={() => undefined} />)
+    render(<Card node={node} onEdit={() => undefined} onOpen={() => undefined} />)
 
     expect(screen.getByRole('button', { name: '工作' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '编辑 工作' })).toBeInTheDocument()
     expect(screen.getByText('专注与产出')).toBeInTheDocument()
     expect(screen.getByText('2026.6.29')).toBeInTheDocument()
     expect(screen.getByTestId(/^mark-/)).toBeInTheDocument()
@@ -26,9 +27,19 @@ describe('Card', () => {
     const user = userEvent.setup()
     const onOpen = vi.fn()
 
-    render(<Card node={node} onOpen={onOpen} />)
+    render(<Card node={node} onEdit={() => undefined} onOpen={onOpen} />)
     await user.click(screen.getByRole('button', { name: '工作' }))
 
     expect(onOpen).toHaveBeenCalledWith('work')
+  })
+
+  it('opens the edit affordance when clicked', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+
+    render(<Card node={node} onEdit={onEdit} onOpen={() => undefined} />)
+    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
+
+    expect(onEdit).toHaveBeenCalledWith('work')
   })
 })

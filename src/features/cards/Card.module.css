@@ -1,19 +1,31 @@
 .card {
+  position: relative;
   display: grid;
   width: 100%;
-  padding: 15px;
-  border: 0;
   border-radius: var(--r-card);
   background: var(--card-fill);
   color: var(--card-title);
+  letter-spacing: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.openButton {
+  display: grid;
+  width: 100%;
+  min-height: inherit;
+  padding: 15px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
   grid-template-rows: auto 1fr auto;
   letter-spacing: 0;
   text-align: left;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.card:focus-visible {
+.openButton:focus-visible,
+.editButton:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
@@ -63,4 +75,20 @@
   font-size: 12px;
   font-weight: 400;
   line-height: 1.2;
+}
+
+.editButton {
+  position: absolute;
+  top: var(--s2);
+  right: var(--s2);
+  display: grid;
+  min-width: 36px;
+  min-height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.28);
+  color: var(--card-sub);
+  font-size: 20px;
+  line-height: 1;
 }

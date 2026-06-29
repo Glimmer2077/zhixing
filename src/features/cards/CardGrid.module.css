@@ -71,3 +71,20 @@
   min-height: 56px;
   border-radius: var(--r-pill);
 }
+
+.addForm {
+  padding: var(--s3);
+  border-style: solid;
+}
+
+.addForm input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--s3);
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--text-1);
+  font-size: 16px;
+  text-align: center;
+}

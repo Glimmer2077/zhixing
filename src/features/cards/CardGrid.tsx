@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { useState } from 'react'
 
 import { STRINGS } from '../../strings'
 import type { Node } from '../tree/types'
@@ -9,10 +10,12 @@ import styles from './CardGrid.module.css'
 interface CardGridProps {
   nodes: Node[]
   addLabel: string
+  onAdd: (title: string) => void
+  onEdit: (id: string) => void
   onOpen: (id: string) => void
 }
 
-export function CardGrid({ nodes, addLabel, onOpen }: CardGridProps) {
+export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen }: CardGridProps) {
   const prefersReducedMotion = useReducedMotion()
 
   if (nodes.length === 0) {
@@ -22,9 +25,7 @@ export function CardGrid({ nodes, addLabel, onOpen }: CardGridProps) {
           <h2>{STRINGS.emptyTitle}</h2>
           <p>{STRINGS.emptyBody}</p>
         </div>
-        <button className={styles.emptyAdd} disabled type="button">
-          {STRINGS.addCard}
-        </button>
+        <AddCard className={styles.emptyAdd} label={STRINGS.addCard} onAdd={onAdd} />
       </section>
     )
   }
@@ -50,7 +51,7 @@ export function CardGrid({ nodes, addLabel, onOpen }: CardGridProps) {
                   duration: prefersReducedMotion ? 0 : 0.2,
                 }}
               >
-                <Card node={node} onOpen={onOpen} />
+                <Card node={node} onEdit={onEdit} onOpen={onOpen} />
               </motion.div>
             ))}
             {addColumn === columnIndex ? (
@@ -62,14 +63,62 @@ export function CardGrid({ nodes, addLabel, onOpen }: CardGridProps) {
                 role="listitem"
                 transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               >
-                <button className={styles.addCard} disabled type="button">
-                  {addLabel}
-                </button>
+                <AddCard className={styles.addCard} label={addLabel} onAdd={onAdd} />
               </motion.div>
             ) : null}
           </AnimatePresence>
         </div>
       ))}
     </div>
+  )
+}
+
+interface AddCardProps {
+  className: string
+  label: string
+  onAdd: (title: string) => void
+}
+
+function AddCard({ className, label, onAdd }: AddCardProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [title, setTitle] = useState('')
+
+  const commit = () => {
+    const nextTitle = title.trim()
+    if (!nextTitle) {
+      setTitle('')
+      setIsEditing(false)
+      return
+    }
+
+    onAdd(nextTitle)
+    setTitle('')
+    setIsEditing(false)
+  }
+
+  if (isEditing) {
+    return (
+      <form
+        className={`${className} ${styles.addForm}`}
+        onSubmit={(event) => {
+          event.preventDefault()
+          commit()
+        }}
+      >
+        <input
+          aria-label={STRINGS.addInputLabel}
+          autoFocus
+          value={title}
+          onBlur={commit}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+      </form>
+    )
+  }
+
+  return (
+    <button className={className} onClick={() => setIsEditing(true)} type="button">
+      {label}
+    </button>
   )
 }
