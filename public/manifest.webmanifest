@@ -1,0 +1,17 @@
+{
+  "name": "知行",
+  "short_name": "知行",
+  "description": "本地优先的个人行为管理卡片树",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F6",
+  "theme_color": "#FAF9F6",
+  "icons": [
+    {
+      "src": "/icons/zhixing.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
