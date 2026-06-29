@@ -240,7 +240,7 @@ const applyOptionalField = <K extends keyof Pick<Node, 'subtitle' | 'colorKey' |
   node[key] = patch[key]
 }
 
-const parentOf = (state: TreeState, id: string): string | null | undefined => {
+export const parentOf = (state: TreeState, id: string): string | null | undefined => {
   if (state.rootIds.includes(id)) {
     return null
   }

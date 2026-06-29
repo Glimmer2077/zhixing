@@ -2,12 +2,16 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useMemo, useState } from 'react'
 
 import { CardGrid } from '../features/cards/CardGrid'
-import { EditSheet } from '../features/editing/EditSheet'
+import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { useNavigation } from '../features/navigation/useNavigation'
 import {
   addNode,
   childrenOf,
+  isDescendant,
+  moveNode,
+  parentOf,
+  pathTo,
   removeNode,
   reorderSiblingsById,
   updateNode,
@@ -27,6 +31,8 @@ export function AppShell() {
   const currentId = path.at(-1) ?? null
   const currentNode = currentId ? tree.nodes[currentId] : null
   const editingNode = editingId ? tree.nodes[editingId] : null
+  const editingParentId = editingId ? (parentOf(tree, editingId) ?? null) : null
+  const parentOptions = editingId ? parentOptionsFor(tree, editingId) : []
   const visibleNodes = childrenOf(tree, currentId)
   const screenKey = currentId ?? 'root'
 
@@ -35,12 +41,19 @@ export function AppShell() {
     setTree((currentTree) => addNode(currentTree, currentId, { title }).state)
   }
 
-  const saveEdit = (patch: EditableNodePatch) => {
+  const saveEdit = (patch: EditableNodePatch, targetParentId: string | null) => {
     if (!editingId) {
       return
     }
     setUndoState(null)
-    setTree((currentTree) => updateNode(currentTree, editingId, patch))
+    setTree((currentTree) => {
+      const updated = updateNode(currentTree, editingId, patch)
+      const currentParentId = parentOf(updated, editingId)
+      if (currentParentId === undefined || currentParentId === targetParentId) {
+        return updated
+      }
+      return moveNode(updated, editingId, targetParentId, Number.POSITIVE_INFINITY)
+    })
     setEditingId(null)
   }
 
@@ -93,6 +106,8 @@ export function AppShell() {
           node={editingNode}
           onClose={() => setEditingId(null)}
           onDelete={deleteNode}
+          parentId={editingParentId}
+          parentOptions={parentOptions}
           onSave={saveEdit}
         />
       ) : null}
@@ -107,3 +122,15 @@ export function AppShell() {
     </main>
   )
 }
+
+const parentOptionsFor = (tree: TreeState, movingId: string): ParentOption[] => [
+  { id: null, label: STRINGS.rootLevel },
+  ...Object.values(tree.nodes)
+    .filter((node) => node.id !== movingId && !isDescendant(tree, movingId, node.id))
+    .map((node) => ({
+      id: node.id,
+      label: pathTo(tree, node.id)
+        .map((pathNode) => pathNode.title)
+        .join(' / '),
+    })),
+]

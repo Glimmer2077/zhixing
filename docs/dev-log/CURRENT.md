@@ -7,8 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M3 - Editing core and same-level drag reorder complete; cross-parent reparent is
-the next M3 slice.
+M3 - Editing gestures complete; M4 persistence is next.
 
 ## Current Status
 
@@ -16,9 +15,10 @@ M0 created a minimal Vite + React + TypeScript app shell, testing/lint/build
 configuration, PWA scaffold, Playwright smoke test, and the development log system.
 Git has been initialized for the project. M1 added the pure tree/domain layer
 with tests before UI work. M2 added the read-only card browsing UI over the seed.
-M3 added the first local editing interactions: inline card creation, edit sheet,
-delete confirmation, single-step undo, and same-level drag reorder through
-`dnd-kit`. Edits still live in React state only; persistence remains deferred.
+M3 added local editing interactions: inline card creation, edit sheet, delete
+confirmation, single-step undo, same-level drag reorder through `dnd-kit`, and
+cross-parent reparent through the edit sheet. Edits still live in React state
+only; persistence remains deferred.
 
 ## Verification
 
@@ -28,14 +28,17 @@ delete confirmation, single-step undo, and same-level drag reorder through
   to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 67 tests across 16 files.
-- `pnpm test:coverage` - passed: 91.44% statements, 81.36% branches, 91.34%
-  functions, 91.81% lines.
+- `pnpm test` - passed: 70 tests across 16 files.
+- `pnpm test:coverage` - passed: 91.82% statements, 83.47% branches, 91.96%
+  functions, 92.17% lines.
 - `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 4 specs across Chromium and mobile Safari profile, 8 total
+- `pnpm e2e` - passed: 5 specs across Chromium and mobile Safari profile, 10 total
   browser checks.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
-- Git commits exist through M3 editing core; same-level drag reorder is ready to commit.
+- Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
+  source/config files returned no matches.
+- Git commits exist through M3 same-level drag reorder; cross-parent reparent is
+  ready to commit.
 
 ## Active Decisions
 
@@ -54,10 +57,14 @@ delete confirmation, single-step undo, and same-level drag reorder through
 - M3 first slice includes add, edit sheet, delete confirmation, and single-step undo.
 - M3 same-level drag reorder uses `dnd-kit` handles and the existing tree `reorder`
   operation.
-- Cross-parent reparent remains the next M3 slice.
+- M3 cross-parent reparent uses the edit sheet parent selector. It appends the moved
+  card to the target parent's child list and excludes the current node plus descendants
+  from valid targets.
+- Full drag-to-parent interactions are deferred until the UI has a multi-level move
+  surface.
 
 ## Next Steps
 
-1. Commit same-level drag reorder.
-2. Add cross-parent reparent as the next M3 slice.
-3. Then start M4 persistence once editing gestures are stable.
+1. Commit cross-parent reparent.
+2. Start M4 persistence with IndexedDB/local-first storage.
+3. Add import/export after persistence stabilizes.

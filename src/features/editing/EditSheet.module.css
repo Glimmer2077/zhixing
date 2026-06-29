@@ -59,7 +59,8 @@
   font-weight: 400;
 }
 
-.field input {
+.field input,
+.field select {
   width: 100%;
   min-height: 44px;
   padding: 0 var(--s3);
@@ -68,6 +69,10 @@
   background: transparent;
   color: var(--text-1);
   font-size: 16px;
+}
+
+.field select {
+  appearance: none;
 }
 
 .optionGroup {

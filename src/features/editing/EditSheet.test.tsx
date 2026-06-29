@@ -22,6 +22,8 @@ describe('EditSheet', () => {
         node={node}
         onClose={() => undefined}
         onDelete={() => undefined}
+        parentId={null}
+        parentOptions={[{ id: null, label: '根级' }]}
         onSave={onSave}
       />,
     )
@@ -34,12 +36,45 @@ describe('EditSheet', () => {
     await user.click(screen.getByRole('radio', { name: 'ring' }))
     await user.click(screen.getByRole('button', { name: '完成' }))
 
-    expect(onSave).toHaveBeenCalledWith({
-      title: '工作流',
-      subtitle: '新的节奏',
-      colorKey: 'sage',
-      markKind: 'ring',
-    })
+    expect(onSave).toHaveBeenCalledWith(
+      {
+        title: '工作流',
+        subtitle: '新的节奏',
+        colorKey: 'sage',
+        markKind: 'ring',
+      },
+      null,
+    )
+  })
+
+  it('submits the selected parent id', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+
+    render(
+      <EditSheet
+        node={node}
+        onClose={() => undefined}
+        onDelete={() => undefined}
+        parentId="daily"
+        parentOptions={[
+          { id: null, label: '根级' },
+          { id: 'daily', label: '日常' },
+          { id: 'growth', label: '成长' },
+        ]}
+        onSave={onSave}
+      />,
+    )
+
+    await user.selectOptions(screen.getByLabelText('移动到'), 'growth')
+    await user.click(screen.getByRole('button', { name: '完成' }))
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '工作',
+      }),
+      'growth',
+    )
   })
 
   it('asks for confirmation before deleting', async () => {
@@ -51,6 +86,8 @@ describe('EditSheet', () => {
         node={node}
         onClose={() => undefined}
         onDelete={onDelete}
+        parentId={null}
+        parentOptions={[{ id: null, label: '根级' }]}
         onSave={() => undefined}
       />,
     )

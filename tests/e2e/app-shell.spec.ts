@@ -52,6 +52,22 @@ test('reorders root cards by dragging the sort handle', async ({ page }) => {
   await expect.poll(() => cardOrder(page, '日常', '工作')).toBe('日常-first')
 })
 
+test('moves a child card to the root level', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { exact: true, name: '工作' }).click()
+  await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
+
+  await page.getByRole('button', { name: '编辑 深度工作' }).click()
+  await page.getByLabel('移动到').selectOption('__root__')
+  await page.getByRole('button', { name: '完成' }).click()
+
+  await expect(page.getByRole('button', { exact: true, name: '深度工作' })).toBeHidden()
+
+  await page.getByRole('button', { name: '返回' }).click()
+  await expect(page.getByRole('button', { exact: true, name: '深度工作' })).toBeVisible()
+})
+
 async function dragBetween(page: Page, source: Locator, target: Locator) {
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()

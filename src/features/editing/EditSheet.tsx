@@ -6,19 +6,36 @@ import type { ColorKey, EditableNodePatch, MarkKind, Node } from '../tree/types'
 import { MARK_KINDS, PALETTE, colorFor, markFor } from '../tree/visuals'
 import styles from './EditSheet.module.css'
 
+export const ROOT_PARENT_VALUE = '__root__'
+
+export interface ParentOption {
+  id: string | null
+  label: string
+}
+
 interface EditSheetProps {
   node: Node
   onClose: () => void
   onDelete: (id: string) => void
-  onSave: (patch: EditableNodePatch) => void
+  parentId: string | null
+  parentOptions: ParentOption[]
+  onSave: (patch: EditableNodePatch, parentId: string | null) => void
 }
 
-export function EditSheet({ node, onClose, onDelete, onSave }: EditSheetProps) {
+export function EditSheet({
+  node,
+  onClose,
+  onDelete,
+  parentId,
+  parentOptions,
+  onSave,
+}: EditSheetProps) {
   const prefersReducedMotion = useReducedMotion()
   const [title, setTitle] = useState(node.title)
   const [subtitle, setSubtitle] = useState(node.subtitle ?? '')
   const [colorKey, setColorKey] = useState<ColorKey>(colorFor(node))
   const [markKind, setMarkKind] = useState<MarkKind>(markFor(node))
+  const [selectedParent, setSelectedParent] = useState(parentValue(parentId))
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
   useEffect(() => {
@@ -39,12 +56,15 @@ export function EditSheet({ node, onClose, onDelete, onSave }: EditSheetProps) {
       return
     }
 
-    onSave({
-      title: nextTitle,
-      subtitle: subtitle.trim() || undefined,
-      colorKey,
-      markKind,
-    })
+    onSave(
+      {
+        title: nextTitle,
+        subtitle: subtitle.trim() || undefined,
+        colorKey,
+        markKind,
+      },
+      parseParentValue(selectedParent),
+    )
   }
 
   return (
@@ -129,6 +149,20 @@ export function EditSheet({ node, onClose, onDelete, onSave }: EditSheetProps) {
               </div>
             </fieldset>
 
+            <label className={styles.field}>
+              <span>{STRINGS.moveTo}</span>
+              <select
+                value={selectedParent}
+                onChange={(event) => setSelectedParent(event.target.value)}
+              >
+                {parentOptions.map((option) => (
+                  <option key={parentValue(option.id)} value={parentValue(option.id)}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             {isConfirmingDelete ? (
               <div className={styles.confirm}>
                 <p>{`删除「${node.title}」及其全部内容？此操作可撤销。`}</p>
@@ -160,3 +194,8 @@ export function EditSheet({ node, onClose, onDelete, onSave }: EditSheetProps) {
     </AnimatePresence>
   )
 }
+
+const parentValue = (id: string | null): string => id ?? ROOT_PARENT_VALUE
+
+const parseParentValue = (value: string): string | null =>
+  value === ROOT_PARENT_VALUE ? null : value

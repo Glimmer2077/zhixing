@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
@@ -57,5 +57,35 @@ describe('AppShell editing', () => {
 
     expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '撤销' })).not.toBeInTheDocument()
+  })
+
+  it('moves a child card to the root level', async () => {
+    const user = userEvent.setup()
+    render(<AppShell />)
+
+    await user.click(screen.getByRole('button', { name: '工作' }))
+    expect(await screen.findByRole('button', { name: '深度工作' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '编辑 深度工作' }))
+    await user.selectOptions(screen.getByLabelText('移动到'), '__root__')
+    await user.click(screen.getByRole('button', { name: '完成' }))
+
+    expect(screen.queryByRole('button', { name: '深度工作' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '返回' }))
+    expect(await screen.findByRole('button', { name: '深度工作' })).toBeInTheDocument()
+  })
+
+  it('does not offer descendants as move targets', async () => {
+    const user = userEvent.setup()
+    render(<AppShell />)
+
+    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
+
+    const moveTo = screen.getByLabelText('移动到')
+    expect(within(moveTo).getByRole('option', { name: '根级' })).toBeInTheDocument()
+    expect(within(moveTo).getByRole('option', { name: '日常' })).toBeInTheDocument()
+    expect(
+      within(moveTo).queryByRole('option', { name: '工作 / 深度工作' }),
+    ).not.toBeInTheDocument()
   })
 })

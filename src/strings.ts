@@ -14,6 +14,8 @@ export const STRINGS = {
   subtitle: '副标题（可选）',
   color: '颜色',
   mark: '标记',
+  moveTo: '移动到',
+  rootLevel: '根级',
   done: '完成',
   close: '关闭',
   delete: '删除',
