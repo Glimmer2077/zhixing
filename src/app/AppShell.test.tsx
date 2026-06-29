@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
+import { PATH_STORAGE_KEY } from '../features/navigation/useNavigation'
 import { createMemoryTreeStorage } from '../features/persistence/treeStorage'
 import { exportTreeToJson } from '../features/persistence/treeTransfer'
 import type { TreeState } from '../features/tree/types'
@@ -14,6 +15,24 @@ const persistedTree: TreeState = {
       title: '项目',
       childIds: [],
       createdAt: 100,
+    },
+  },
+}
+
+const nestedPersistedTree: TreeState = {
+  rootIds: ['project'],
+  nodes: {
+    project: {
+      id: 'project',
+      title: '项目',
+      childIds: ['milestone'],
+      createdAt: 100,
+    },
+    milestone: {
+      id: 'milestone',
+      title: '里程碑',
+      childIds: [],
+      createdAt: 101,
     },
   },
 }
@@ -50,6 +69,25 @@ describe('AppShell', () => {
         ),
       ).toBe(true)
     })
+  })
+
+  it('restores the persisted navigation path after reload', async () => {
+    window.localStorage.setItem(PATH_STORAGE_KEY, JSON.stringify(['project']))
+
+    render(<AppShell storage={createMemoryTreeStorage(nestedPersistedTree)} />)
+
+    expect(await screen.findByRole('heading', { name: '项目' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '里程碑' })).toBeInTheDocument()
+  })
+
+  it('resets stale persisted navigation paths to the root level', async () => {
+    window.localStorage.setItem(PATH_STORAGE_KEY, JSON.stringify(['missing']))
+
+    render(<AppShell storage={createMemoryTreeStorage(nestedPersistedTree)} />)
+
+    expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '项目' })).not.toBeInTheDocument()
+    expect(JSON.parse(window.localStorage.getItem(PATH_STORAGE_KEY) ?? '')).toEqual([])
   })
 
   it('imports a tree from settings', async () => {

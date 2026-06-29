@@ -81,6 +81,19 @@ test('keeps added cards after reload', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
 })
 
+test('keeps the current card after reload', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { exact: true, name: '工作' }).click()
+  await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '深度工作' })).toBeVisible()
+
+  await page.reload()
+
+  await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '深度工作' })).toBeVisible()
+})
+
 test('imports a JSON tree from settings', async ({ page }) => {
   await page.goto('/')
 

@@ -79,6 +79,14 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     void storage.save(tree).catch(() => undefined)
   }, [hasHydrated, storage, tree])
 
+  useEffect(() => {
+    if (!hasHydrated || path.length === 0 || isValidPath(tree, path)) {
+      return
+    }
+
+    reset()
+  }, [hasHydrated, path, reset, tree])
+
   const addCard = (title: string) => {
     setUndoState(null)
     setTree((currentTree) => addNode(currentTree, currentId, { title }).state)
@@ -229,3 +237,17 @@ const parentOptionsFor = (tree: TreeState, movingId: string): ParentOption[] => 
         .join(' / '),
     })),
 ]
+
+const isValidPath = (tree: TreeState, path: string[]): boolean =>
+  path.every((id, index) => {
+    if (!tree.nodes[id]) {
+      return false
+    }
+
+    if (index === 0) {
+      return tree.rootIds.includes(id)
+    }
+
+    const parentId = path[index - 1]
+    return Boolean(parentId && tree.nodes[parentId]?.childIds.includes(id))
+  })
