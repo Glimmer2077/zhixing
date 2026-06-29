@@ -78,6 +78,42 @@
   pointer-events: none;
 }
 
+.note,
+.confirmPanel p,
+.about p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.confirmPanel {
+  display: grid;
+  gap: var(--s3);
+  padding: var(--s3);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+}
+
+.confirmActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+}
+
+.secondaryButton {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .error {
   margin: 0;
   padding: var(--s3);
@@ -86,6 +122,20 @@
   color: #8c4a48;
   font-size: 14px;
   line-height: 1.4;
+}
+
+.about {
+  display: grid;
+  gap: var(--s2);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--hairline);
+}
+
+.about h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .dangerZone {

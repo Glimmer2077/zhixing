@@ -20,6 +20,7 @@ export function SettingsSheet({
   onReset,
 }: SettingsSheetProps) {
   const prefersReducedMotion = useReducedMotion()
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null)
   const [isConfirmingReset, setIsConfirmingReset] = useState(false)
 
   useEffect(() => {
@@ -37,8 +38,17 @@ export function SettingsSheet({
     const file = event.target.files?.[0]
     event.target.value = ''
     if (file) {
-      onImportFile(file)
+      setPendingImportFile(file)
     }
+  }
+
+  const confirmImport = () => {
+    if (!pendingImportFile) {
+      return
+    }
+
+    onImportFile(pendingImportFile)
+    setPendingImportFile(null)
   }
 
   return (
@@ -81,11 +91,36 @@ export function SettingsSheet({
             </label>
           </div>
 
+          <p className={styles.note}>{STRINGS.exportReminder}</p>
+
+          {pendingImportFile ? (
+            <div className={styles.confirmPanel}>
+              <p>{STRINGS.importConfirm}</p>
+              <div className={styles.confirmActions}>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={() => setPendingImportFile(null)}
+                  type="button"
+                >
+                  {STRINGS.cancel}
+                </button>
+                <button className={styles.actionButton} onClick={confirmImport} type="button">
+                  {STRINGS.confirmImport}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           {importError ? (
             <p className={styles.error} role="alert">
               {importError}
             </p>
           ) : null}
+
+          <section className={styles.about} aria-labelledby="settings-about-heading">
+            <h3 id="settings-about-heading">{STRINGS.about}</h3>
+            <p>{STRINGS.aboutBody}</p>
+          </section>
 
           <div className={styles.dangerZone}>
             {isConfirmingReset ? (

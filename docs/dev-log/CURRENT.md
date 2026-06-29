@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; path persistence is ready to commit.
+M5 - polish and acceptance QA in progress; settings polish is ready to commit.
 
 ## Current Status
 
@@ -28,6 +28,8 @@ the restored tree through the existing local-first save path.
 M5 started by closing the acceptance gap where data survived reloads but navigation
 path did not. The current path now persists locally, reloads restore the current
 card level, and stale paths are reset to root after tree hydration.
+M5 settings polish adds import confirmation before replacing the tree, an iOS backup
+reminder beside export/import, and a concise about section.
 
 ## Verification
 
@@ -37,17 +39,17 @@ card level, and stale paths are reset to root after tree hydration.
   to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 91 tests across 20 files.
-- `pnpm test:coverage` - passed: 91.72% statements, 83.1% branches, 91.33%
-  functions, 92.08% lines.
+- `pnpm test` - passed: 93 tests across 20 files.
+- `pnpm test:coverage` - passed: 91.65% statements, 82.99% branches, 91.44%
+  functions, 92% lines.
 - `pnpm build` - passed and generated PWA service worker output.
 - `pnpm e2e` - passed: 9 specs across Chromium and mobile Safari profile, 18 total
   browser checks.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
-- Git commits exist through M4 reset; M5 path persistence is implemented and
-  verified for the next commit.
+- Git commits exist through M5 path persistence; M5 settings polish is implemented
+  and verified for the next commit.
 
 ## Active Decisions
 
@@ -86,9 +88,11 @@ card level, and stale paths are reset to root after tree hydration.
   `zhixing.path.v1`.
 - Path restoration waits for tree hydration before deciding whether a stored path is
   stale; stale or structurally invalid paths reset to root.
+- JSON import now requires a second confirmation click before replacing the tree.
+- Settings shows the iOS backup reminder from `SPEC.md` and a concise about section.
 
 ## Next Steps
 
-1. Commit M5 path persistence.
-2. Add settings polish from `SPEC.md`: import confirmation, backup reminder, and about.
-3. Continue M5 acceptance QA for PWA/offline/safe-area/a11y/motion.
+1. Commit M5 settings polish.
+2. Continue M5 acceptance QA for PWA/offline/safe-area/a11y/motion.
+3. Decide whether to add appearance controls before final v1 QA.

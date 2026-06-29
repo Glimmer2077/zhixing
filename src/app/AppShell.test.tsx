@@ -99,6 +99,8 @@ describe('AppShell', () => {
       screen.getByLabelText('导入 JSON'),
       new File([exportTreeToJson(persistedTree)], 'zhixing.json', { type: 'application/json' }),
     )
+    expect(screen.getByText('导入将替换当前全部内容，确定吗？')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '确认导入' }))
 
     expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '工作' })).not.toBeInTheDocument()
@@ -154,6 +156,7 @@ describe('AppShell', () => {
       screen.getByLabelText('导入 JSON'),
       new File(['not json'], 'bad.json', { type: 'application/json' }),
     )
+    await user.click(screen.getByRole('button', { name: '确认导入' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('导入失败')
     expect(screen.getByRole('button', { name: '工作' })).toBeInTheDocument()

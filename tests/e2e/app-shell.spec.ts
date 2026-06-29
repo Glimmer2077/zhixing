@@ -116,6 +116,8 @@ test('imports a JSON tree from settings', async ({ page }) => {
       }),
     ),
   })
+  await expect(page.getByText('导入将替换当前全部内容，确定吗？')).toBeVisible()
+  await page.getByRole('button', { name: '确认导入' }).click()
 
   await expect(page.getByRole('button', { exact: true, name: '导入项目' })).toBeVisible()
   await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeHidden()
