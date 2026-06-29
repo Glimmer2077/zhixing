@@ -147,6 +147,30 @@ export const reorder = (
   return replaceParentIds(state, parentId, nextIds)
 }
 
+export const reorderSiblingsById = (
+  state: TreeState,
+  parentId: string | null,
+  activeId: string,
+  overId: string,
+): TreeState => {
+  if (activeId === overId) {
+    return state
+  }
+
+  const ids = idsForParent(state, parentId)
+  if (!ids) {
+    return state
+  }
+
+  const fromIndex = ids.indexOf(activeId)
+  const toIndex = ids.indexOf(overId)
+  if (fromIndex === -1 || toIndex === -1) {
+    return state
+  }
+
+  return reorder(state, parentId, fromIndex, toIndex)
+}
+
 export const childrenOf = (state: TreeState, parentId: string | null): Node[] => {
   const ids = idsForParent(state, parentId) ?? []
   return ids.map((id) => state.nodes[id]).filter((node): node is Node => Boolean(node))

@@ -8,6 +8,7 @@ export const STRINGS = {
   addDomain: '添加领域',
   addInputLabel: '新卡片标题',
   edit: '编辑',
+  reorder: '排序',
   editCard: '编辑卡片',
   title: '标题',
   subtitle: '副标题（可选）',

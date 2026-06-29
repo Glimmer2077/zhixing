@@ -8,6 +8,7 @@ import {
   pathTo,
   removeNode,
   reorder,
+  reorderSiblingsById,
   updateNode,
 } from './treeOps'
 
@@ -245,6 +246,22 @@ describe('treeOps', () => {
     expect(reorder(original, 'missing', 0, 1)).toBe(original)
     expect(reorder(original, 'work', -1, 1)).toBe(original)
     expect(reorder(original, 'work', 10, 1)).toBe(original)
+  })
+
+  it('reorders siblings by node id', () => {
+    const original = baseState()
+    const updated = reorderSiblingsById(original, 'work', 'deep', 'sync')
+
+    expect(updated.nodes.work.childIds).toEqual(['sync', 'deep'])
+    expect(original.nodes.work.childIds).toEqual(['deep', 'sync'])
+  })
+
+  it('returns the same state for invalid sibling id reorder requests', () => {
+    const original = baseState()
+
+    expect(reorderSiblingsById(original, 'work', 'deep', 'deep')).toBe(original)
+    expect(reorderSiblingsById(original, 'work', 'deep', 'missing')).toBe(original)
+    expect(reorderSiblingsById(original, 'work', 'missing', 'sync')).toBe(original)
   })
 
   it('selects children, paths, and descendant relationships', () => {

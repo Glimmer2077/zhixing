@@ -29,12 +29,15 @@ describe('CardGrid', () => {
         onAdd={() => undefined}
         onEdit={() => undefined}
         onOpen={() => undefined}
+        onReorder={() => undefined}
       />,
     )
 
     const grid = screen.getByRole('list', { name: '卡片' })
     expect(within(grid).getByRole('button', { name: '工作' })).toBeInTheDocument()
     expect(within(grid).getByRole('button', { name: '日常' })).toBeInTheDocument()
+    expect(within(grid).getByRole('button', { name: '排序 工作' })).toBeInTheDocument()
+    expect(within(grid).getByRole('button', { name: '排序 日常' })).toBeInTheDocument()
     expect(within(grid).getByRole('button', { name: '添加领域' })).toBeEnabled()
   })
 
@@ -46,6 +49,7 @@ describe('CardGrid', () => {
         onAdd={() => undefined}
         onEdit={() => undefined}
         onOpen={() => undefined}
+        onReorder={() => undefined}
       />,
     )
 

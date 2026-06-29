@@ -1,4 +1,19 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
 
 import { STRINGS } from '../../strings'
@@ -13,10 +28,24 @@ interface CardGridProps {
   onAdd: (title: string) => void
   onEdit: (id: string) => void
   onOpen: (id: string) => void
+  onReorder: (activeId: string, overId: string) => void
 }
 
-export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen }: CardGridProps) {
-  const prefersReducedMotion = useReducedMotion()
+export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen, onReorder }: CardGridProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const itemIds = nodes.map((node) => node.id)
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    onReorder(String(active.id), String(over.id))
+  }
 
   if (nodes.length === 0) {
     return (
@@ -34,41 +63,67 @@ export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen }: CardGridPro
   const addColumn = totalColumnHeight(columns[0]) <= totalColumnHeight(columns[1]) ? 0 : 1
 
   return (
-    <div className={styles.grid} role="list" aria-label={STRINGS.cardGrid}>
-      {columns.map((column, columnIndex) => (
-        <div className={styles.column} key={columnIndex}>
-          <AnimatePresence initial={false}>
-            {column.map((node, index) => (
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.item}
-                exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -8 }}
-                initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
-                key={node.id}
-                role="listitem"
-                transition={{
-                  delay: prefersReducedMotion ? 0 : index * 0.04,
-                  duration: prefersReducedMotion ? 0 : 0.2,
-                }}
-              >
-                <Card node={node} onEdit={onEdit} onOpen={onOpen} />
-              </motion.div>
-            ))}
-            {addColumn === columnIndex ? (
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.item}
-                initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
-                key="add"
-                role="listitem"
-                transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-              >
-                <AddCard className={styles.addCard} label={addLabel} onAdd={onAdd} />
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+      <SortableContext items={itemIds} strategy={rectSortingStrategy}>
+        <div className={styles.grid} role="list" aria-label={STRINGS.cardGrid}>
+          {columns.map((column, columnIndex) => (
+            <div className={styles.column} key={columnIndex}>
+              {column.map((node) => (
+                <SortableCardItem key={node.id} node={node} onEdit={onEdit} onOpen={onOpen} />
+              ))}
+              {addColumn === columnIndex ? (
+                <div className={styles.item} key="add" role="listitem">
+                  <AddCard className={styles.addCard} label={addLabel} onAdd={onAdd} />
+                </div>
+              ) : null}
+            </div>
+          ))}
         </div>
-      ))}
+      </SortableContext>
+    </DndContext>
+  )
+}
+
+interface SortableCardItemProps {
+  node: Node
+  onEdit: (id: string) => void
+  onOpen: (id: string) => void
+}
+
+function SortableCardItem({ node, onEdit, onOpen }: SortableCardItemProps) {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: node.id })
+
+  return (
+    <div
+      className={`${styles.item} ${styles.sortableItem} ${
+        isDragging ? styles.dragging : ''
+      }`.trim()}
+      ref={setNodeRef}
+      role="listitem"
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+    >
+      <Card node={node} onEdit={onEdit} onOpen={onOpen} />
+      <button
+        {...attributes}
+        {...listeners}
+        aria-label={`${STRINGS.reorder} ${node.title}`}
+        className={styles.dragHandle}
+        ref={setActivatorNodeRef}
+        type="button"
+      >
+        <span aria-hidden="true">⋮⋮</span>
+      </button>
     </div>
   )
 }

@@ -38,7 +38,7 @@ describe('AppShell editing', () => {
     await user.click(screen.getByRole('button', { name: '删除' }))
     await user.click(screen.getByRole('button', { name: '确认删除' }))
 
-    expect(screen.getByRole('status')).toHaveTextContent('已删除 · 撤销')
+    expect(screen.getByText('已删除 · 撤销')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '撤销' }))
     expect(await screen.findByRole('button', { name: '工作' })).toBeInTheDocument()

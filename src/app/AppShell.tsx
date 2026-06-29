@@ -5,7 +5,13 @@ import { CardGrid } from '../features/cards/CardGrid'
 import { EditSheet } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { useNavigation } from '../features/navigation/useNavigation'
-import { addNode, childrenOf, removeNode, updateNode } from '../features/tree/treeOps'
+import {
+  addNode,
+  childrenOf,
+  removeNode,
+  reorderSiblingsById,
+  updateNode,
+} from '../features/tree/treeOps'
 import { createSeedTree } from '../features/tree/seed'
 import type { EditableNodePatch, TreeState } from '../features/tree/types'
 import { STRINGS } from '../strings'
@@ -36,6 +42,14 @@ export function AppShell() {
     setUndoState(null)
     setTree((currentTree) => updateNode(currentTree, editingId, patch))
     setEditingId(null)
+  }
+
+  const reorderCards = (activeId: string, overId: string) => {
+    if (activeId === overId) {
+      return
+    }
+    setUndoState(null)
+    setTree((currentTree) => reorderSiblingsById(currentTree, currentId, activeId, overId))
   }
 
   const deleteNode = (id: string) => {
@@ -70,6 +84,7 @@ export function AppShell() {
             onAdd={addCard}
             onEdit={setEditingId}
             onOpen={push}
+            onReorder={reorderCards}
           />
         </motion.section>
       </AnimatePresence>
