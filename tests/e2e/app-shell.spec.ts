@@ -108,6 +108,27 @@ test('imports a JSON tree from settings', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeHidden()
 })
 
+test('resets local data from settings', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '添加领域' }).click()
+  await page.getByLabel('新卡片标题').fill('长期项目')
+  await page.getByLabel('新卡片标题').press('Enter')
+  await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
+
+  await page.getByRole('button', { name: '设置' }).click()
+  await page.getByRole('button', { name: '恢复初始数据' }).click()
+  await page.getByRole('button', { name: '确认恢复' }).click()
+
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeHidden()
+
+  await page.reload()
+
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeHidden()
+})
+
 async function dragBetween(page: Page, source: Locator, target: Locator) {
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()

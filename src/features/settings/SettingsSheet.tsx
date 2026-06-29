@@ -1,4 +1,4 @@
-import { useEffect, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { STRINGS } from '../../strings'
@@ -9,6 +9,7 @@ interface SettingsSheetProps {
   onClose: () => void
   onExport: () => void
   onImportFile: (file: File) => void
+  onReset: () => void
 }
 
 export function SettingsSheet({
@@ -16,8 +17,10 @@ export function SettingsSheet({
   onClose,
   onExport,
   onImportFile,
+  onReset,
 }: SettingsSheetProps) {
   const prefersReducedMotion = useReducedMotion()
+  const [isConfirmingReset, setIsConfirmingReset] = useState(false)
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -83,6 +86,25 @@ export function SettingsSheet({
               {importError}
             </p>
           ) : null}
+
+          <div className={styles.dangerZone}>
+            {isConfirmingReset ? (
+              <div className={styles.resetConfirm}>
+                <p>{STRINGS.resetDataPrompt}</p>
+                <button className={styles.dangerButton} onClick={onReset} type="button">
+                  {STRINGS.confirmResetData}
+                </button>
+              </div>
+            ) : (
+              <button
+                className={styles.ghostDangerButton}
+                onClick={() => setIsConfirmingReset(true)}
+                type="button"
+              >
+                {STRINGS.resetData}
+              </button>
+            )}
+          </div>
         </motion.section>
       </motion.div>
     </AnimatePresence>

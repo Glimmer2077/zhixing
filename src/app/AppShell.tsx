@@ -148,6 +148,15 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     }
   }
 
+  const resetData = () => {
+    setTree(initialTree)
+    setUndoState(null)
+    setEditingId(null)
+    setImportError(null)
+    setIsSettingsOpen(false)
+    reset()
+  }
+
   return (
     <main className={styles.shell} aria-label={STRINGS.appName}>
       <Header
@@ -202,6 +211,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
           onClose={() => setIsSettingsOpen(false)}
           onExport={exportTree}
           onImportFile={(file) => void importTree(file)}
+          onReset={resetData}
         />
       ) : null}
     </main>

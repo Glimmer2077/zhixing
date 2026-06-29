@@ -15,6 +15,7 @@ describe('SettingsSheet', () => {
         onClose={() => undefined}
         onExport={onExport}
         onImportFile={onImportFile}
+        onReset={() => undefined}
       />,
     )
 
@@ -35,9 +36,33 @@ describe('SettingsSheet', () => {
         onClose={() => undefined}
         onExport={() => undefined}
         onImportFile={() => undefined}
+        onReset={() => undefined}
       />,
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent('导入失败')
+  })
+
+  it('requires confirmation before resetting data', async () => {
+    const user = userEvent.setup()
+    const onReset = vi.fn()
+
+    render(
+      <SettingsSheet
+        importError={null}
+        onClose={() => undefined}
+        onExport={() => undefined}
+        onImportFile={() => undefined}
+        onReset={onReset}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: '恢复初始数据' }))
+
+    expect(onReset).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: '确认恢复' }))
+
+    expect(onReset).toHaveBeenCalledTimes(1)
   })
 })

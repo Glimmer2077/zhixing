@@ -120,4 +120,28 @@ describe('AppShell', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('导入失败')
     expect(screen.getByRole('button', { name: '工作' })).toBeInTheDocument()
   })
+
+  it('resets to the seed tree from settings', async () => {
+    const user = userEvent.setup()
+    const storage = createMemoryTreeStorage(persistedTree)
+    const save = vi.spyOn(storage, 'save')
+
+    render(<AppShell storage={storage} />)
+
+    expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '设置' }))
+    await user.click(screen.getByRole('button', { name: '恢复初始数据' }))
+    await user.click(screen.getByRole('button', { name: '确认恢复' }))
+
+    expect(await screen.findByRole('button', { name: '工作' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '项目' })).not.toBeInTheDocument()
+    await vi.waitFor(() => {
+      expect(
+        save.mock.calls.some(([savedTree]) =>
+          Object.values(savedTree.nodes).some((node) => node.title === '工作'),
+        ),
+      ).toBe(true)
+    })
+  })
 })

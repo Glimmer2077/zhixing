@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M4 - local-first persistence and JSON import/export complete; reset/clear-local-data is next.
+M4 - local data management complete; next product slice is ready to choose.
 
 ## Current Status
 
@@ -22,6 +22,9 @@ persistence for the tree, with first-run seed fallback and validation before
 loading stored state. M4 now also includes settings-sheet JSON export/import that
 reuses the v1 tree schema, resets navigation after successful import, and keeps the
 current tree unchanged when import validation fails.
+M4 now also includes a confirmed reset path in settings that restores the initial
+seed tree, clears edit/undo/import state, resets navigation to root, and persists
+the restored tree through the existing local-first save path.
 
 ## Verification
 
@@ -31,17 +34,17 @@ current tree unchanged when import validation fails.
   to avoid unrelated churn.
 - `pnpm typecheck` - passed.
 - `pnpm lint` - passed.
-- `pnpm test` - passed: 84 tests across 19 files.
-- `pnpm test:coverage` - passed: 91.23% statements, 81.91% branches, 90.71%
-  functions, 91.63% lines.
+- `pnpm test` - passed: 86 tests across 19 files.
+- `pnpm test:coverage` - passed: 91.38% statements, 82.05% branches, 90.84%
+  functions, 91.78% lines.
 - `pnpm build` - passed and generated PWA service worker output.
-- `pnpm e2e` - passed: 7 specs across Chromium and mobile Safari profile, 14 total
+- `pnpm e2e` - passed: 8 specs across Chromium and mobile Safari profile, 16 total
   browser checks.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
-- Git commits exist through M4 IndexedDB persistence; M4 import/export is implemented
-  and verified for the next commit.
+- Git commits exist through M4 import/export; M4 reset is implemented and verified
+  for the next commit.
 
 ## Active Decisions
 
@@ -74,9 +77,11 @@ current tree unchanged when import validation fails.
 - JSON import accepts only validated v1 tree payloads; malformed or invalid files
   show an error and do not mutate the current tree.
 - Successful import clears undo/edit state and resets navigation to the root level.
+- Reset data uses the settings sheet with a second confirmation step, restores the
+  seed tree, and relies on the existing post-hydration save effect to persist it.
 
 ## Next Steps
 
-1. Commit M4 JSON import/export.
-2. Add a small reset/clear-local-data path.
-3. Start the next product slice after the local data management path is complete.
+1. Commit M4 reset/clear-local-data.
+2. Review `SPEC.md` and choose the next product slice.
+3. Start the next slice with tests first.
