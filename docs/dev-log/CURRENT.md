@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; PWA/offline app-shell coverage is ready
-to commit.
+M5 - polish and acceptance QA in progress; safe-area, accessibility, and
+reduced-motion coverage is ready to commit.
 
 ## Current Status
 
@@ -35,26 +35,28 @@ M5 PWA/offline QA adds a stable Playwright regression that verifies the generate
 service worker can keep the app shell visible when network requests fail. The
 WebKit reload interception limitation is documented in the test and skipped for
 that browser profile.
+M5 safe-area/a11y/motion QA expands safe-area padding to fixed sheets and
+horizontal insets, adds dialog focus restoration, labels dialogs from their
+headings, and disables tap scaling when reduced motion is requested.
 
 ## Verification
 
-- `./node_modules/.bin/prettier --write tests/e2e/app-shell.spec.ts playwright.config.ts`
-  - passed.
+- `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 93 tests across 20 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 91.65% statements, 82.99% branches, 91.44%
-  functions, 92% lines.
+- `./node_modules/.bin/vitest run` - passed: 96 tests across 20 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 91.97% statements, 82.73%
+  branches, 92.2% functions, 92.33% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
-- `CI= ./node_modules/.bin/playwright test` - passed: 19 browser checks, with the
-  PWA request-failure reload regression passing on Chromium and intentionally
+- `CI= ./node_modules/.bin/playwright test` - passed: 23 browser checks, with the
+  PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 settings polish; M5 PWA/offline QA is implemented
-  and verified for the next commit.
+- Git commits exist through M5 PWA/offline QA; M5 safe-area/a11y/motion QA is
+  implemented and verified for the next commit.
 
 ## Active Decisions
 
@@ -99,9 +101,15 @@ that browser profile.
   so e2e runs do not trigger an interactive pnpm `node_modules` rebuild prompt.
 - `.pnpm-store/` is ignored because pnpm can create it as local cache during tooling
   runs.
+- Dialog close behavior uses a shared hook so Escape and close buttons restore focus
+  to the opener after the close event completes.
+- App shell, fixed toasts, and fixed sheets account for top, bottom, left, and right
+  safe-area insets.
+- Reduced-motion users keep navigation and sheet transitions at zero-duration and
+  card tap scaling is disabled.
 
 ## Next Steps
 
-1. Commit M5 PWA/offline QA.
-2. Continue M5 acceptance QA for safe-area/a11y/motion.
-3. Decide whether to add appearance controls before final v1 QA.
+1. Commit M5 safe-area/a11y/motion QA.
+2. Decide whether appearance controls are needed before final v1 acceptance.
+3. Run final v1 acceptance pass against `SPEC.md`.

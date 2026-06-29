@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { STRINGS } from '../../strings'
+import { useDialogClose } from '../dialog/useDialogClose'
 import type { ColorKey, EditableNodePatch, MarkKind, Node } from '../tree/types'
 import { MARK_KINDS, PALETTE, colorFor, markFor } from '../tree/visuals'
 import styles from './EditSheet.module.css'
@@ -37,17 +38,7 @@ export function EditSheet({
   const [markKind, setMarkKind] = useState<MarkKind>(markFor(node))
   const [selectedParent, setSelectedParent] = useState(parentValue(parentId))
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  const closeDialog = useDialogClose(onClose)
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -77,7 +68,7 @@ export function EditSheet({
       >
         <motion.section
           animate={{ opacity: 1, y: 0 }}
-          aria-label={STRINGS.editCard}
+          aria-labelledby="edit-sheet-heading"
           aria-modal="true"
           className={styles.sheet}
           exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
@@ -86,11 +77,11 @@ export function EditSheet({
           transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
         >
           <div className={styles.header}>
-            <h2>{STRINGS.editCard}</h2>
+            <h2 id="edit-sheet-heading">{STRINGS.editCard}</h2>
             <button
               aria-label={STRINGS.close}
               className={styles.iconButton}
-              onClick={onClose}
+              onClick={closeDialog}
               type="button"
             >
               <span aria-hidden="true">×</span>

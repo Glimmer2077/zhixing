@@ -1,8 +1,8 @@
 .shell {
   display: grid;
   min-height: 100svh;
-  padding: calc(env(safe-area-inset-top) + var(--s4)) var(--s4)
-    calc(env(safe-area-inset-bottom) + var(--s4));
+  padding: calc(env(safe-area-inset-top) + var(--s4)) calc(env(safe-area-inset-right) + var(--s4))
+    calc(env(safe-area-inset-bottom) + var(--s4)) calc(env(safe-area-inset-left) + var(--s4));
   background: var(--canvas);
   color: var(--text-1);
   gap: var(--s5);
@@ -15,7 +15,7 @@
 
 .toast {
   position: fixed;
-  right: var(--s4);
+  right: calc(env(safe-area-inset-right) + var(--s4));
   bottom: calc(env(safe-area-inset-bottom) + var(--s4));
   z-index: 30;
   display: flex;

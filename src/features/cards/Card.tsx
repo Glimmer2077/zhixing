@@ -1,5 +1,5 @@
 import { useRef, type CSSProperties } from 'react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 
 import { formatDate } from '../../lib/date'
 import { STRINGS } from '../../strings'
@@ -23,6 +23,7 @@ type CardStyle = CSSProperties & {
 
 export function Card({ node, onEdit, onOpen }: CardProps) {
   const longPressTimer = useRef<number | null>(null)
+  const prefersReducedMotion = useReducedMotion()
   const palette = paletteByKey(colorFor(node))
   const size = sizeFor(node.id)
   const style: CardStyle = {
@@ -48,7 +49,7 @@ export function Card({ node, onEdit, onOpen }: CardProps) {
       className={`${styles.card} ${styles[`tier${size}`]}`}
       layoutId={`card-${node.id}`}
       style={style}
-      whileTap={{ scale: 0.98 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
     >
       <button
         aria-label={node.title}

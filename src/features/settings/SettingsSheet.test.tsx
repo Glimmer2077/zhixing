@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { useState } from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { SettingsSheet } from './SettingsSheet'
@@ -110,4 +111,38 @@ describe('SettingsSheet', () => {
 
     expect(onReset).toHaveBeenCalledTimes(1)
   })
+
+  it('restores focus to the opener when closed', async () => {
+    const user = userEvent.setup()
+
+    render(<SettingsSheetHarness />)
+
+    const opener = screen.getByRole('button', { name: '打开设置' })
+    await user.click(opener)
+    await user.click(screen.getByRole('button', { name: '关闭' }))
+
+    expect(screen.queryByRole('dialog', { name: '设置' })).not.toBeInTheDocument()
+    await waitFor(() => expect(opener).toHaveFocus())
+  })
 })
+
+function SettingsSheetHarness() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)} type="button">
+        打开设置
+      </button>
+      {isOpen ? (
+        <SettingsSheet
+          importError={null}
+          onClose={() => setIsOpen(false)}
+          onExport={() => undefined}
+          onImportFile={() => undefined}
+          onReset={() => undefined}
+        />
+      ) : null}
+    </>
+  )
+}

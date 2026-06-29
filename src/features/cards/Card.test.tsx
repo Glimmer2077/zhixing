@@ -1,8 +1,45 @@
+import type { CSSProperties, ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { Card } from './Card'
 import type { Node } from '../tree/types'
+
+const motionState = vi.hoisted(() => ({ prefersReducedMotion: false }))
+
+vi.mock('motion/react', async () => {
+  const React = await import('react')
+
+  return {
+    motion: {
+      article: ({
+        children,
+        className,
+        layoutId,
+        style,
+        whileTap,
+      }: {
+        children?: ReactNode
+        className?: string
+        layoutId?: string
+        style?: CSSProperties
+        whileTap?: unknown
+      }) =>
+        React.createElement(
+          'article',
+          {
+            className,
+            'data-layout-id': layoutId,
+            'data-testid': 'motion-card',
+            'data-while-tap': whileTap ? JSON.stringify(whileTap) : '',
+            style,
+          },
+          children,
+        ),
+    },
+    useReducedMotion: () => motionState.prefersReducedMotion,
+  }
+})
 
 const node: Node = {
   id: 'work',
@@ -13,6 +50,10 @@ const node: Node = {
 }
 
 describe('Card', () => {
+  beforeEach(() => {
+    motionState.prefersReducedMotion = false
+  })
+
   it('renders node title, subtitle, date, and mark', () => {
     render(<Card node={node} onEdit={() => undefined} onOpen={() => undefined} />)
 
@@ -41,5 +82,13 @@ describe('Card', () => {
     await user.click(screen.getByRole('button', { name: '编辑 工作' }))
 
     expect(onEdit).toHaveBeenCalledWith('work')
+  })
+
+  it('does not configure tap scaling when reduced motion is requested', () => {
+    motionState.prefersReducedMotion = true
+
+    render(<Card node={node} onEdit={() => undefined} onOpen={() => undefined} />)
+
+    expect(screen.getByTestId('motion-card')).toHaveAttribute('data-while-tap', '')
   })
 })

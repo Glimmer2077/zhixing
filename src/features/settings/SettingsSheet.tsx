@@ -1,7 +1,8 @@
-import { useEffect, useState, type ChangeEvent } from 'react'
+import { useState, type ChangeEvent, type RefObject } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { STRINGS } from '../../strings'
+import { useDialogClose } from '../dialog/useDialogClose'
 import styles from './SettingsSheet.module.css'
 
 interface SettingsSheetProps {
@@ -10,6 +11,7 @@ interface SettingsSheetProps {
   onExport: () => void
   onImportFile: (file: File) => void
   onReset: () => void
+  returnFocusRef?: RefObject<HTMLElement | null>
 }
 
 export function SettingsSheet({
@@ -18,21 +20,12 @@ export function SettingsSheet({
   onExport,
   onImportFile,
   onReset,
+  returnFocusRef,
 }: SettingsSheetProps) {
   const prefersReducedMotion = useReducedMotion()
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null)
   const [isConfirmingReset, setIsConfirmingReset] = useState(false)
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  const closeDialog = useDialogClose(onClose, { returnFocusRef })
 
   const importFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -61,7 +54,7 @@ export function SettingsSheet({
       >
         <motion.section
           animate={{ opacity: 1, y: 0 }}
-          aria-label={STRINGS.settings}
+          aria-labelledby="settings-sheet-heading"
           aria-modal="true"
           className={styles.sheet}
           exit={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
@@ -70,11 +63,12 @@ export function SettingsSheet({
           transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
         >
           <div className={styles.header}>
-            <h2>{STRINGS.settings}</h2>
+            <h2 id="settings-sheet-heading">{STRINGS.settings}</h2>
             <button
               aria-label={STRINGS.close}
+              autoFocus
               className={styles.iconButton}
-              onClick={onClose}
+              onClick={closeDialog}
               type="button"
             >
               <span aria-hidden="true">×</span>

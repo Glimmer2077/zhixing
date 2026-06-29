@@ -5,7 +5,8 @@
   display: grid;
   align-items: end;
   background: rgba(20, 20, 20, 0.22);
-  padding: var(--s4);
+  padding: calc(env(safe-area-inset-top) + var(--s4)) calc(env(safe-area-inset-right) + var(--s4))
+    calc(env(safe-area-inset-bottom) + var(--s4)) calc(env(safe-area-inset-left) + var(--s4));
 }
 
 .sheet {

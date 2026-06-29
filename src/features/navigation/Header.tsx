@@ -1,3 +1,5 @@
+import type { Ref } from 'react'
+
 import { STRINGS } from '../../strings'
 import styles from './Header.module.css'
 
@@ -6,9 +8,10 @@ interface HeaderProps {
   canGoBack: boolean
   onBack: () => void
   onSettings: () => void
+  settingsButtonRef?: Ref<HTMLButtonElement>
 }
 
-export function Header({ title, canGoBack, onBack, onSettings }: HeaderProps) {
+export function Header({ title, canGoBack, onBack, onSettings, settingsButtonRef }: HeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -21,6 +24,7 @@ export function Header({ title, canGoBack, onBack, onSettings }: HeaderProps) {
       </div>
       <button
         className={styles.settings}
+        ref={settingsButtonRef}
         type="button"
         aria-label={STRINGS.settings}
         onClick={onSettings}

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { CardGrid } from '../features/cards/CardGrid'
 import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
@@ -36,6 +36,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [undoState, setUndoState] = useState<TreeState | null>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const { path, push, pop, reset } = useNavigation()
   const prefersReducedMotion = useReducedMotion()
   const currentId = path.at(-1) ?? null
@@ -175,6 +176,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
           setImportError(null)
           setIsSettingsOpen(true)
         }}
+        settingsButtonRef={settingsButtonRef}
       />
       <AnimatePresence mode="wait">
         <motion.section
@@ -220,6 +222,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
           onExport={exportTree}
           onImportFile={(file) => void importTree(file)}
           onReset={resetData}
+          returnFocusRef={settingsButtonRef}
         />
       ) : null}
     </main>

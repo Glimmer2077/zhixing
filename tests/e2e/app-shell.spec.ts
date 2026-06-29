@@ -145,6 +145,31 @@ test('imports a JSON tree from settings', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeHidden()
 })
 
+test('restores focus after closing settings', async ({ page }) => {
+  await page.goto('/')
+
+  const settingsButton = page.getByRole('button', { name: '设置' })
+  await settingsButton.click()
+  await expect(page.getByRole('dialog', { name: '设置' })).toBeVisible()
+
+  await page.getByRole('button', { name: '关闭' }).click()
+
+  await expect(page.getByRole('dialog', { name: '设置' })).toBeHidden()
+  await expect(settingsButton).toBeFocused()
+})
+
+test('honors the reduced motion preference', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+
+  await expect
+    .poll(() => page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"))
+    .toBe(true)
+
+  await page.getByRole('button', { exact: true, name: '工作' }).click()
+  await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
+})
+
 test('resets local data from settings', async ({ page }) => {
   await page.goto('/')
 

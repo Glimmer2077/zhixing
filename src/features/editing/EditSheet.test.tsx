@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { useState } from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { EditSheet } from './EditSheet'
@@ -98,4 +99,39 @@ describe('EditSheet', () => {
     await user.click(screen.getByRole('button', { name: '确认删除' }))
     expect(onDelete).toHaveBeenCalledWith('work')
   })
+
+  it('restores focus to the opener when closed', async () => {
+    const user = userEvent.setup()
+
+    render(<EditSheetHarness />)
+
+    const opener = screen.getByRole('button', { name: '打开编辑' })
+    await user.click(opener)
+    await user.click(screen.getByRole('button', { name: '关闭' }))
+
+    expect(screen.queryByRole('dialog', { name: '编辑卡片' })).not.toBeInTheDocument()
+    await waitFor(() => expect(opener).toHaveFocus())
+  })
 })
+
+function EditSheetHarness() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)} type="button">
+        打开编辑
+      </button>
+      {isOpen ? (
+        <EditSheet
+          node={node}
+          onClose={() => setIsOpen(false)}
+          onDelete={() => undefined}
+          parentId={null}
+          parentOptions={[{ id: null, label: '根级' }]}
+          onSave={() => undefined}
+        />
+      ) : null}
+    </>
+  )
+}
