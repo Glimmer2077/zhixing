@@ -1,0 +1,66 @@
+.card {
+  display: grid;
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: var(--card-fill);
+  color: var(--card-title);
+  cursor: pointer;
+  grid-template-rows: auto 1fr auto;
+  letter-spacing: 0;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.tierS {
+  min-height: 152px;
+}
+
+.tierM {
+  min-height: 180px;
+}
+
+.tierL {
+  min-height: 212px;
+}
+
+.text {
+  display: grid;
+  gap: var(--s1);
+  min-width: 0;
+}
+
+.title {
+  overflow-wrap: anywhere;
+  color: var(--card-title);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.subtitle {
+  overflow-wrap: anywhere;
+  color: var(--card-sub);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.markWrap {
+  display: grid;
+  min-height: 76px;
+  place-items: center;
+}
+
+.date {
+  color: var(--card-sub);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+}

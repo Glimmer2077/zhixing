@@ -19,6 +19,11 @@ body {
   overscroll-behavior: none;
 }
 
+body,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 button,
 input,
 textarea,
