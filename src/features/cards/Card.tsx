@@ -1,8 +1,6 @@
-import { useRef, type CSSProperties } from 'react'
+import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
-import { formatDate } from '../../lib/date'
-import { STRINGS } from '../../strings'
 import { Mark } from '../marks/Mark'
 import type { Node } from '../tree/types'
 import { colorFor, markFor, paletteByKey, sizeFor } from '../tree/visuals'
@@ -23,6 +21,7 @@ type CardStyle = CSSProperties & {
 
 export function Card({ node, onEdit, onOpen }: CardProps) {
   const longPressTimer = useRef<number | null>(null)
+  const pointerStart = useRef<{ x: number; y: number } | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const palette = paletteByKey(colorFor(node))
   const size = sizeFor(node.id)
@@ -33,14 +32,31 @@ export function Card({ node, onEdit, onOpen }: CardProps) {
     '--card-mark': palette.mark,
   }
 
-  const startLongPress = () => {
-    longPressTimer.current = window.setTimeout(() => onEdit(node.id), 400)
+  const startLongPress = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    pointerStart.current = { x: event.clientX, y: event.clientY }
+    longPressTimer.current = window.setTimeout(() => {
+      longPressTimer.current = null
+      onEdit(node.id)
+    }, 400)
   }
 
   const clearLongPress = () => {
     if (longPressTimer.current !== null) {
       window.clearTimeout(longPressTimer.current)
       longPressTimer.current = null
+    }
+    pointerStart.current = null
+  }
+
+  const cancelLongPressOnMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!pointerStart.current) {
+      return
+    }
+
+    const deltaX = Math.abs(event.clientX - pointerStart.current.x)
+    const deltaY = Math.abs(event.clientY - pointerStart.current.y)
+    if (deltaX > 8 || deltaY > 8) {
+      clearLongPress()
     }
   }
 
@@ -62,6 +78,7 @@ export function Card({ node, onEdit, onOpen }: CardProps) {
         onPointerCancel={clearLongPress}
         onPointerDown={startLongPress}
         onPointerLeave={clearLongPress}
+        onPointerMove={cancelLongPressOnMove}
         onPointerUp={clearLongPress}
         type="button"
       >
@@ -72,17 +89,6 @@ export function Card({ node, onEdit, onOpen }: CardProps) {
         <span className={styles.markWrap}>
           <Mark kind={markFor(node)} size={size} />
         </span>
-        <time className={styles.date} dateTime={new Date(node.createdAt).toISOString()}>
-          {formatDate(node.createdAt)}
-        </time>
-      </button>
-      <button
-        aria-label={`${STRINGS.edit} ${node.title}`}
-        className={styles.editButton}
-        onClick={() => onEdit(node.id)}
-        type="button"
-      >
-        <span aria-hidden="true">…</span>
       </button>
     </motion.article>
   )

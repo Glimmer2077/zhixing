@@ -35,7 +35,6 @@
 }
 
 .back,
-.history,
 .settings {
   display: grid;
   flex: 0 0 auto;
@@ -49,11 +48,6 @@
   line-height: 1;
 }
 
-.history {
-  color: var(--text-2);
-  font-size: 20px;
-}
-
 .back {
   margin-left: -10px;
 }
@@ -63,7 +57,6 @@
 }
 
 .back:focus-visible,
-.history:focus-visible,
 .settings:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;

@@ -38,8 +38,8 @@ describe('CardGrid', () => {
     const grid = screen.getByRole('list', { name: '卡片' })
     expect(within(grid).getByRole('button', { name: '工作' })).toBeInTheDocument()
     expect(within(grid).getByRole('button', { name: '日常' })).toBeInTheDocument()
-    expect(within(grid).getByRole('button', { name: '排序 工作' })).toBeInTheDocument()
-    expect(within(grid).getByRole('button', { name: '排序 日常' })).toBeInTheDocument()
+    expect(within(grid).queryByRole('button', { name: '排序 工作' })).not.toBeInTheDocument()
+    expect(within(grid).queryByRole('button', { name: '排序 日常' })).not.toBeInTheDocument()
     expect(within(grid).getByRole('button', { name: '添加领域' })).toBeEnabled()
   })
 
@@ -61,12 +61,10 @@ describe('CardGrid', () => {
     expect(screen.getByRole('button', { name: '添加' })).toBeEnabled()
   })
 
-  it('classifies handle drops as reorder and card-body drops as reparent', () => {
-    const handleRect = new DOMRect(8, 8, 36, 36)
+  it('classifies top-zone drops as reorder and card-body drops as reparent without handles', () => {
     const targetRect = new DOMRect(0, 0, 160, 180)
 
-    expect(dropIntentForPoint({ x: 26, y: 26 }, handleRect)).toBe('reorder')
-    expect(dropIntentForPoint({ x: 120, y: 40 }, handleRect, targetRect)).toBe('reorder')
-    expect(dropIntentForPoint({ x: 92, y: 92 }, handleRect, targetRect)).toBe('reparent')
+    expect(dropIntentForPoint({ x: 120, y: 40 }, null, targetRect)).toBe('reorder')
+    expect(dropIntentForPoint({ x: 92, y: 92 }, null, targetRect)).toBe('reparent')
   })
 })

@@ -16,16 +16,14 @@ describe('drag drop intent helpers', () => {
   })
 
   it('classifies top-zone drops as reorder and middle-card drops as reparent', () => {
-    const handles = new Map([['daily', handleWithRect(new DOMRect(8, 8, 36, 36))]])
-
     expect(
-      shouldReorder(dragEvent({ overId: 'daily' }), handles, {
+      shouldReorder(dragEvent({ overId: 'daily' }), new Map(), {
         x: 120,
         y: 40,
       }),
     ).toBe(true)
     expect(
-      shouldReorder(dragEvent({ overId: 'daily' }), handles, {
+      shouldReorder(dragEvent({ overId: 'daily' }), new Map(), {
         x: 80,
         y: 100,
       }),
@@ -33,19 +31,17 @@ describe('drag drop intent helpers', () => {
   })
 
   it('returns a reparent target only for card-body drops', () => {
-    const handles = new Map([['daily', handleWithRect(new DOMRect(8, 8, 36, 36))]])
-
-    expect(reparentTargetFor(dragEvent({ activeId: 'work', overId: 'work' }), handles, null)).toBe(
-      null,
-    )
     expect(
-      reparentTargetFor(dragEvent({ activeId: 'work', overId: 'daily' }), handles, {
+      reparentTargetFor(dragEvent({ activeId: 'work', overId: 'work' }), new Map(), null),
+    ).toBe(null)
+    expect(
+      reparentTargetFor(dragEvent({ activeId: 'work', overId: 'daily' }), new Map(), {
         x: 80,
         y: 100,
       }),
     ).toBe('daily')
     expect(
-      reparentTargetFor(dragEvent({ activeId: 'work', overId: 'daily' }), handles, {
+      reparentTargetFor(dragEvent({ activeId: 'work', overId: 'daily' }), new Map(), {
         x: 20,
         y: 20,
       }),
@@ -90,10 +86,4 @@ function dragEvent({
         }
       : null,
   } as unknown as DragMoveEvent
-}
-
-function handleWithRect(rect: DOMRect): HTMLButtonElement {
-  const handle = document.createElement('button')
-  vi.spyOn(handle, 'getBoundingClientRect').mockReturnValue(rect)
-  return handle
 }

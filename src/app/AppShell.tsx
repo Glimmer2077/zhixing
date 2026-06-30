@@ -47,13 +47,10 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const initialTree = useMemo<TreeState>(() => createSeedTree(), [])
   const [treeStore] = useState(() => createTreeHistoryStore(initialTree))
   const tree = useStore(treeStore, (state) => state.tree)
-  const undoDepth = useStore(treeStore.temporal, (state) => state.pastStates.length)
-  const redoDepth = useStore(treeStore.temporal, (state) => state.futureStates.length)
   const [hasHydrated, setHasHydrated] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
-  const [historyNotice, setHistoryNotice] = useState<string | null>(null)
   const [themePreference, setThemePreference] = useState<ThemePreference>(() =>
     readThemePreference(),
   )
@@ -68,8 +65,6 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const parentOptions = editingId ? parentOptionsFor(tree, editingId) : []
   const visibleNodes = childrenOf(tree, currentId)
   const screenKey = currentId ?? 'root'
-  const canUndo = undoDepth > 0
-  const canRedo = redoDepth > 0
 
   useEffect(() => {
     let isActive = true
@@ -117,26 +112,11 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     writeThemePreference(themePreference)
   }, [themePreference])
 
-  const applyTreeChange = (updater: TreeUpdater, notice: string = STRINGS.changedUndo) => {
-    const previousTree = treeStore.getState().tree
+  const applyTreeChange = (updater: TreeUpdater) => {
     commitTree(treeStore, updater)
-    if (treeStore.getState().tree !== previousTree) {
-      setHistoryNotice(notice)
-    }
-  }
-
-  const undoTree = () => {
-    treeStore.temporal.getState().undo()
-    setHistoryNotice(null)
-  }
-
-  const redoTree = () => {
-    treeStore.temporal.getState().redo()
-    setHistoryNotice(null)
   }
 
   const openEdit = (id: string) => {
-    setHistoryNotice(null)
     setEditingId(id)
   }
 
@@ -210,7 +190,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   }
 
   const deleteNode = (id: string) => {
-    applyTreeChange((currentTree) => removeNode(currentTree, id), STRINGS.deletedUndo)
+    applyTreeChange((currentTree) => removeNode(currentTree, id))
     setEditingId(null)
   }
 
@@ -258,16 +238,11 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
       <Header
         title={currentNode?.title ?? null}
         canGoBack={path.length > 0}
-        canRedo={canRedo}
-        canUndo={canUndo}
         onBack={pop}
-        onRedo={redoTree}
         onSettings={() => {
-          setHistoryNotice(null)
           setImportError(null)
           setIsSettingsOpen(true)
         }}
-        onUndo={undoTree}
         settingsButtonRef={settingsButtonRef}
       />
       <AnimatePresence mode="wait">
@@ -299,14 +274,6 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
           parentOptions={parentOptions}
           onSave={saveEdit}
         />
-      ) : null}
-      {historyNotice && canUndo && !editingNode && !isSettingsOpen ? (
-        <div className={styles.toast} role="status">
-          <span>{historyNotice}</span>
-          <button onClick={undoTree} type="button">
-            {STRINGS.undo}
-          </button>
-        </div>
       ) : null}
       {isSettingsOpen ? (
         <SettingsSheet

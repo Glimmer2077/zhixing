@@ -1,6 +1,5 @@
 import {
   DndContext,
-  KeyboardSensor,
   PointerSensor,
   closestCenter,
   useSensor,
@@ -8,12 +7,7 @@ import {
   type DragEndEvent,
   type DragMoveEvent,
 } from '@dnd-kit/core'
-import {
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-  useSortable,
-} from '@dnd-kit/sortable'
+import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useEffect, useRef, useState } from 'react'
 
@@ -43,13 +37,9 @@ export function CardGrid({
   onReparent,
   onReorder,
 }: CardGridProps) {
-  const dragHandleRefs = useRef(new Map<string, HTMLButtonElement>())
   const lastPointerPointRef = useRef<{ x: number; y: number } | null>(null)
   const [reparentTargetId, setReparentTargetId] = useState<string | null>(null)
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const itemIds = nodes.map((node) => node.id)
 
@@ -76,9 +66,7 @@ export function CardGrid({
   }, [])
 
   const handleDragMove = (event: DragMoveEvent) => {
-    setReparentTargetId(
-      reparentTargetFor(event, dragHandleRefs.current, lastPointerPointRef.current),
-    )
+    setReparentTargetId(reparentTargetFor(event, new Map(), lastPointerPointRef.current))
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -90,7 +78,7 @@ export function CardGrid({
 
     const activeId = String(active.id)
     const targetId = String(over.id)
-    if (shouldReorder(event, dragHandleRefs.current, lastPointerPointRef.current)) {
+    if (shouldReorder(event, new Map(), lastPointerPointRef.current)) {
       onReorder(activeId, targetId)
       return
     }
@@ -132,13 +120,6 @@ export function CardGrid({
                   node={node}
                   onEdit={onEdit}
                   onOpen={onOpen}
-                  onRegisterDragHandle={(element) => {
-                    if (element) {
-                      dragHandleRefs.current.set(node.id, element)
-                      return
-                    }
-                    dragHandleRefs.current.delete(node.id)
-                  }}
                 />
               ))}
               {addColumn === columnIndex ? (
@@ -159,25 +140,11 @@ interface SortableCardItemProps {
   node: Node
   onEdit: (id: string) => void
   onOpen: (id: string) => void
-  onRegisterDragHandle: (element: HTMLButtonElement | null) => void
 }
 
-function SortableCardItem({
-  isReparentTarget,
-  node,
-  onEdit,
-  onOpen,
-  onRegisterDragHandle,
-}: SortableCardItemProps) {
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setActivatorNodeRef,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: node.id })
+function SortableCardItem({ isReparentTarget, node, onEdit, onOpen }: SortableCardItemProps) {
+  const { isDragging, listeners, setActivatorNodeRef, setNodeRef, transform, transition } =
+    useSortable({ id: node.id })
 
   return (
     <div
@@ -185,27 +152,18 @@ function SortableCardItem({
         isDragging ? styles.dragging : ''
       } ${isReparentTarget ? styles.reparentTarget : ''}`.trim()}
       data-reparent-target-id={node.id}
-      ref={setNodeRef}
+      ref={(element) => {
+        setNodeRef(element)
+        setActivatorNodeRef(element)
+      }}
       role="listitem"
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
       }}
+      {...listeners}
     >
       <Card node={node} onEdit={onEdit} onOpen={onOpen} />
-      <button
-        {...attributes}
-        {...listeners}
-        aria-label={`${STRINGS.reorder} ${node.title}`}
-        className={styles.dragHandle}
-        ref={(element) => {
-          setActivatorNodeRef(element)
-          onRegisterDragHandle(element)
-        }}
-        type="button"
-      >
-        <span aria-hidden="true">⋮⋮</span>
-      </button>
     </div>
   )
 }

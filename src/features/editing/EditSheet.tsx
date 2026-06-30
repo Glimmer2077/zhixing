@@ -156,7 +156,7 @@ export function EditSheet({
 
             {isConfirmingDelete ? (
               <div className={styles.confirm}>
-                <p>{`删除「${node.title}」及其全部内容？此操作可撤销。`}</p>
+                <p>{`删除「${node.title}」及其全部内容？此操作会立即生效。`}</p>
                 <button
                   className={styles.deleteConfirm}
                   onClick={() => onDelete(node.id)}

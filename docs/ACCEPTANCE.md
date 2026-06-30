@@ -13,7 +13,10 @@ The major v1 acceptance gaps tracked in `docs/dev-log/CURRENT.md` are closed.
 - Local-first IndexedDB persistence with first-run seed fallback.
 - JSON export/import using the v1 schema.
 - Reset to seed data with confirmation.
-- Full undo/redo history for structural tree changes.
+- Compact card UI with no visible card edit/sort chrome, no visible header
+  undo/redo controls, and no transient undo toast.
+- Internal tree history is still retained for future reuse, but v1 public recovery
+  relies on confirmation before destructive actions rather than visible undo/redo.
 - PWA manifest, service worker generation, offline app-shell regression, iOS-safe viewport metadata.
 - Settings import confirmation, backup reminder, theme controls, and about section.
 - Light/dark theme override with persisted preference.
@@ -25,8 +28,8 @@ Last full pass:
 
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 117 tests across 25 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 91.08% statements, 82.45% branches, 91.04% functions, 91.34% lines.
+- `./node_modules/.bin/vitest run` - passed: 118 tests across 25 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 91.44% statements, 82.05% branches, 91.83% functions, 91.63% lines.
 - `./node_modules/.bin/vite build` - passed and generated `dist/sw.js`.
 - `CI=1 ./node_modules/.bin/playwright test` - passed: 31 checks, 1 intentional mobile Safari skip.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
@@ -42,3 +45,4 @@ The only skipped Playwright check is the mobile Safari profile for request-failu
 - Data is intentionally local-only. There is no account, backend, cloud sync, or analytics.
 - iOS may evict PWA storage. Users should export JSON backups from Settings.
 - Store or app-store packaging is not required for v1; the current delivery model is an installable HTTPS-hosted PWA.
+- Visible undo/redo controls were removed by product decision during the compact UI pass; delete still requires confirmation.

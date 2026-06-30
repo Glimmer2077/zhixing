@@ -41,28 +41,17 @@ describe('Header', () => {
     expect(onSettings).toHaveBeenCalledTimes(1)
   })
 
-  it('shows undo and redo affordances when history is available', async () => {
-    const user = userEvent.setup()
-    const onUndo = vi.fn()
-    const onRedo = vi.fn()
-
+  it('does not render history actions in the compact header', () => {
     render(
       <Header
         title={null}
         canGoBack={false}
-        canRedo
-        canUndo
         onBack={() => undefined}
-        onRedo={onRedo}
         onSettings={() => undefined}
-        onUndo={onUndo}
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: '撤销上一步' }))
-    await user.click(screen.getByRole('button', { name: '重做上一步' }))
-
-    expect(onUndo).toHaveBeenCalledTimes(1)
-    expect(onRedo).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: '撤销上一步' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '重做上一步' })).not.toBeInTheDocument()
   })
 })

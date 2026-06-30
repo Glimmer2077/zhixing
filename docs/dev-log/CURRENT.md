@@ -42,12 +42,12 @@ M5 appearance controls add the Settings `外观` section with `跟随系统` / `
 `深色`, persist the preference in localStorage, and apply explicit light/dark
 overrides through `html[data-theme]`.
 M5 drag-to-parent reparent adds card-body drop behavior: dragging to a target
-card's top/handle area keeps same-level reorder, while dragging into the card body
-moves the active card under that target with a visible drop outline.
-M5 full undo/redo replaces the delete-only undo state with a zundo temporal tree
-history. Structural edits now enter the same history stack, Header exposes undo
-and redo affordances, and transient undo toasts stay out of the way while sheets
-are open.
+card's top zone keeps same-level reorder, while dragging into the card body moves
+the active card under that target with a visible drop outline.
+M5 full undo/redo originally replaced the delete-only undo state with a zundo
+temporal tree history. The later compact UI pass removed public Header undo/redo
+buttons and transient undo toasts at the user's request; structural edits still go
+through the same tree history store for future reuse.
 M5 swipe-down back adds a downward pointer gesture from non-interactive nested
 screen chrome/content to return to the parent level, while preserving button,
 form, card, and drag interactions.
@@ -68,6 +68,11 @@ The user-provided root `icon.png` is now the source icon. The app publishes PNG
 icon sizes at `public/icons/zhixing-180.png`, `public/icons/zhixing-192.png`, and
 `public/icons/zhixing-512.png`, and the old SVG icon has been removed from the PWA
 manifest path.
+M5 compact card UI removes visible card chrome that duplicated existing gestures:
+the drag handle, card edit menu, card date text, Header undo/redo buttons, and
+bottom undo toast are no longer shown. Card title/subtitle text and the mark icon
+are centered, long-press/context-menu still opens editing, and dragging the card
+surface still supports top-zone reorder plus body reparent.
 
 ## Verification
 
@@ -118,6 +123,26 @@ manifest path.
   25 files.
 - `env BASE_PATH=/zhixing/ ./node_modules/.bin/vite build` - passed after the icon
   change and generated a manifest that references PNG app icons.
+- Selected compact UI tests initially failed against the old visible card/header
+  controls, then passed after implementation:
+  `src/features/cards/Card.test.tsx`, `src/features/cards/CardGrid.test.tsx`,
+  `src/features/cards/dragDrop.test.ts`, `src/features/navigation/Header.test.tsx`,
+  `src/app/AppShell.editing.test.tsx`, and `src/features/editing/EditSheet.test.tsx`.
+- `./node_modules/.bin/tsc -b --pretty false` - passed after the compact UI change.
+- `./node_modules/.bin/eslint . --max-warnings=0` - passed after the compact UI
+  change.
+- `./node_modules/.bin/vitest run` - passed after the compact UI change: 118 tests
+  across 25 files.
+- `./node_modules/.bin/vitest run --coverage` - passed after the compact UI change:
+  91.44% statements, 82.05% branches, 91.83% functions, 91.63% lines.
+- `./node_modules/.bin/vite build` - passed after the compact UI change.
+- `env BASE_PATH=/zhixing/ ./node_modules/.bin/vite build` - passed after the
+  compact UI change.
+- `CI=1 ./node_modules/.bin/playwright test` - passed after the compact UI change:
+  31 checks, 1 intentional mobile Safari service-worker reload skip.
+- Playwright mobile viewport label inspection returned only `设置`, the four card
+  titles, and `添加领域`, confirming the visible card edit/sort and undo controls
+  were removed from the first screen.
 
 ## Active Decisions
 
@@ -169,15 +194,20 @@ manifest path.
 - Theme preference key is `zhixing.theme.v1`; `system` removes `data-theme` so the
   existing `prefers-color-scheme` CSS remains authoritative.
 - Explicit `light` and `dark` write `html[data-theme]` overrides and survive reload.
-- Dragging onto a target card's top/handle zone is treated as same-level reorder;
+- Dragging onto a target card's top zone is treated as same-level reorder;
   dragging into the card body is treated as reparent. This keeps existing sort
-  handles usable while adding the requested card-body drop affordance.
+  behavior available after removing visible handles.
 - Tree history is isolated in a small zundo temporal store per `AppShell` instance;
   IndexedDB hydration replaces state without creating undo history, while user
   edits are tracked.
-- Header undo/redo buttons are the full-history affordance. The transient undo toast
-  remains available after edits, but is hidden while edit/settings sheets are open
-  so it cannot block mobile sheet actions.
+- Public undo/redo affordances are intentionally hidden in the compact UI: Header
+  undo/redo buttons and transient undo toasts were removed for visual simplicity.
+  Delete confirmation now says the action applies immediately instead of promising
+  undo.
+- Cards no longer show visible edit or drag controls. Long-press or context-menu
+  opens the edit sheet, and dragging from the card surface handles reorder/reparent.
+- Card dates are hidden in the compact UI. Card title/subtitle text and the mark icon
+  are centered to reduce visual noise.
 - Swipe-down back starts only from non-interactive elements, uses an 88px downward
   threshold with limited horizontal drift, and delegates navigation to the existing
   `pop()` path.
@@ -201,7 +231,7 @@ manifest path.
 
 ## Next Steps
 
-1. Commit and push the PNG icon update.
+1. Commit and push the compact card UI update.
 2. Wait for GitHub Pages deployment to finish.
-3. Open `https://glimmer2077.github.io/zhixing/` on a phone, reinstall or refresh the
-   Home Screen app if needed, and verify the new icon.
+3. Open `https://glimmer2077.github.io/zhixing/` on a phone, refresh or reinstall the
+   Home Screen app if needed, and verify the simplified card screen plus icon.

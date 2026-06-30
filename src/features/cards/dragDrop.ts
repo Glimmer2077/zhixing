@@ -32,11 +32,10 @@ export const shouldReorder = (
   }
 
   const targetHandle = dragHandles.get(String(over.id))
-  if (!targetHandle) {
-    return true
-  }
-
-  return dropIntentForPoint(point, targetHandle.getBoundingClientRect(), over.rect) === 'reorder'
+  return (
+    dropIntentForPoint(point, targetHandle?.getBoundingClientRect() ?? null, over.rect) ===
+    'reorder'
+  )
 }
 
 export const dragPointFromEvent = (event: DragMoveEvent | DragEndEvent): Point | null => {

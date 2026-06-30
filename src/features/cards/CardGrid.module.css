@@ -32,35 +32,6 @@
   outline-offset: 4px;
 }
 
-.dragHandle {
-  position: absolute;
-  top: var(--s2);
-  left: var(--s2);
-  z-index: 2;
-  display: grid;
-  min-width: 36px;
-  min-height: 36px;
-  place-items: center;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.38);
-  color: var(--text-2);
-  cursor: grab;
-  font-size: 17px;
-  letter-spacing: 0;
-  line-height: 1;
-  touch-action: none;
-}
-
-.dragHandle:active {
-  cursor: grabbing;
-}
-
-.dragHandle:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
-}
-
 .addCard,
 .emptyAdd {
   display: grid;

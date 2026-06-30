@@ -94,7 +94,7 @@ describe('EditSheet', () => {
     )
 
     await user.click(screen.getByRole('button', { name: '删除' }))
-    expect(screen.getByText('删除「工作」及其全部内容？此操作可撤销。')).toBeInTheDocument()
+    expect(screen.getByText('删除「工作」及其全部内容？此操作会立即生效。')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '确认删除' }))
     expect(onDelete).toHaveBeenCalledWith('work')

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
@@ -19,7 +19,7 @@ describe('AppShell editing', () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
+    openEditSheet('工作')
     await user.clear(screen.getByLabelText('标题'))
     await user.type(screen.getByLabelText('标题'), '工作流')
     await user.clear(screen.getByLabelText('副标题（可选）'))
@@ -30,57 +30,43 @@ describe('AppShell editing', () => {
     expect(screen.getByText('节奏和产出')).toBeInTheDocument()
   })
 
-  it('hides the transient undo toast when opening the edit sheet', async () => {
+  it('does not show transient undo toast after adding a card', async () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
     await user.click(screen.getByRole('button', { name: '添加领域' }))
     await user.type(screen.getByLabelText('新卡片标题'), '项目')
     await user.keyboard('{Enter}')
-    expect(await screen.findByText('已更改 · 撤销')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '编辑 项目' }))
-
+    expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
     expect(screen.queryByText('已更改 · 撤销')).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: '编辑卡片' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '撤销' })).not.toBeInTheDocument()
   })
 
-  it('deletes a card and restores it with undo', async () => {
+  it('deletes a card without showing an undo toast', async () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
+    openEditSheet('工作')
     await user.click(screen.getByRole('button', { name: '删除' }))
     await user.click(screen.getByRole('button', { name: '确认删除' }))
 
-    expect(screen.getByText('已删除 · 撤销')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '撤销' }))
-    expect(await screen.findByRole('button', { name: '工作' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '工作' })).not.toBeInTheDocument()
+    expect(screen.queryByText('已删除 · 撤销')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '撤销' })).not.toBeInTheDocument()
   })
 
-  it('keeps full undo and redo history across consecutive edits', async () => {
+  it('does not expose header undo or redo controls after edits', async () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
-    await user.click(screen.getByRole('button', { name: '删除' }))
-    await user.click(screen.getByRole('button', { name: '确认删除' }))
-    await user.click(screen.getAllByRole('button', { name: '添加领域' })[0])
+    await user.click(screen.getByRole('button', { name: '添加领域' }))
     await user.type(screen.getByLabelText('新卡片标题'), '项目')
     await user.keyboard('{Enter}')
 
     expect(await screen.findByRole('button', { name: '项目' })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '撤销上一步' }))
-    expect(screen.queryByRole('button', { name: '项目' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '工作' })).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '撤销上一步' }))
-    expect(await screen.findByRole('button', { name: '工作' })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '重做上一步' }))
-    expect(screen.queryByRole('button', { name: '工作' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '撤销上一步' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '重做上一步' })).not.toBeInTheDocument()
   })
 
   it('moves a child card to the root level', async () => {
@@ -89,7 +75,7 @@ describe('AppShell editing', () => {
 
     await user.click(screen.getByRole('button', { name: '工作' }))
     expect(await screen.findByRole('button', { name: '深度工作' })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '编辑 深度工作' }))
+    openEditSheet('深度工作')
     await user.selectOptions(screen.getByLabelText('移动到'), '__root__')
     await user.click(screen.getByRole('button', { name: '完成' }))
 
@@ -99,11 +85,10 @@ describe('AppShell editing', () => {
     expect(await screen.findByRole('button', { name: '深度工作' })).toBeInTheDocument()
   })
 
-  it('does not offer descendants as move targets', async () => {
-    const user = userEvent.setup()
+  it('does not offer descendants as move targets', () => {
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: '编辑 工作' }))
+    openEditSheet('工作')
 
     const moveTo = screen.getByLabelText('移动到')
     expect(within(moveTo).getByRole('option', { name: '根级' })).toBeInTheDocument()
@@ -113,3 +98,8 @@ describe('AppShell editing', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+function openEditSheet(cardName: string) {
+  fireEvent.contextMenu(screen.getByRole('button', { name: cardName }))
+  expect(screen.getByRole('dialog', { name: '编辑卡片' })).toBeInTheDocument()
+}

@@ -69,14 +69,16 @@ test('adds and renames a root card', async ({ page }) => {
 
   await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeVisible()
 
-  await page.getByRole('button', { name: '编辑 项目' }).click()
+  await openEditSheet(page, '项目')
   await page.getByLabel('标题', { exact: true }).fill('项目集')
   await page.getByRole('button', { name: '完成' }).click()
 
   await expect(page.getByRole('button', { exact: true, name: '项目集' })).toBeVisible()
 })
 
-test('undoes and redoes a structural edit from the header', async ({ page }) => {
+test('keeps the compact header and hides transient undo affordances after edits', async ({
+  page,
+}) => {
   await page.goto('/')
 
   await page.getByRole('button', { name: '添加领域' }).click()
@@ -84,14 +86,12 @@ test('undoes and redoes a structural edit from the header', async ({ page }) => 
   await page.getByLabel('新卡片标题').press('Enter')
   await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeVisible()
 
-  await page.getByRole('button', { name: '撤销上一步' }).click()
-  await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeHidden()
-
-  await page.getByRole('button', { name: '重做上一步' }).click()
-  await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '撤销上一步' })).toBeHidden()
+  await expect(page.getByRole('button', { name: '重做上一步' })).toBeHidden()
+  await expect(page.getByText('已更改 · 撤销')).toBeHidden()
 })
 
-test('reorders root cards by dragging the sort handle', async ({ page }) => {
+test('reorders root cards by dragging onto the target card top zone', async ({ page }) => {
   await page.goto('/')
 
   const workCard = page.getByRole('button', { exact: true, name: '工作' })
@@ -101,8 +101,9 @@ test('reorders root cards by dragging the sort handle', async ({ page }) => {
 
   await dragBetween(
     page,
-    page.getByRole('button', { name: '排序 工作' }),
-    page.getByRole('button', { name: '排序 日常' }),
+    page.getByRole('button', { exact: true, name: '工作' }),
+    page.getByRole('button', { exact: true, name: '日常' }),
+    'top',
   )
 
   await expect.poll(() => cardOrder(page, '日常', '工作')).toBe('日常-first')
@@ -116,7 +117,7 @@ test('reparents a card by dragging it onto another card', async ({ page }) => {
 
   await dragBetween(
     page,
-    page.getByRole('button', { name: '排序 工作' }),
+    page.getByRole('button', { exact: true, name: '工作' }),
     page.getByRole('button', { exact: true, name: '日常' }),
   )
 
@@ -133,7 +134,7 @@ test('moves a child card to the root level', async ({ page }) => {
   await page.getByRole('button', { exact: true, name: '工作' }).click()
   await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
 
-  await page.getByRole('button', { name: '编辑 深度工作' }).click()
+  await openEditSheet(page, '深度工作')
   await page.getByLabel('移动到').selectOption('__root__')
   await page.getByRole('button', { name: '完成' }).click()
 
@@ -257,18 +258,33 @@ test('resets local data from settings', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeHidden()
 })
 
-async function dragBetween(page: Page, source: Locator, target: Locator) {
+async function dragBetween(
+  page: Page,
+  source: Locator,
+  target: Locator,
+  targetPosition: 'center' | 'top' = 'center',
+) {
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()
   expect(sourceBox).not.toBeNull()
   expect(targetBox).not.toBeNull()
 
+  const targetY =
+    targetPosition === 'top'
+      ? targetBox!.y + Math.min(24, targetBox!.height / 4)
+      : targetBox!.y + targetBox!.height / 2
+
   await page.mouse.move(sourceBox!.x + sourceBox!.width / 2, sourceBox!.y + sourceBox!.height / 2)
   await page.mouse.down()
-  await page.mouse.move(targetBox!.x + targetBox!.width / 2, targetBox!.y + targetBox!.height / 2, {
+  await page.mouse.move(targetBox!.x + targetBox!.width / 2, targetY, {
     steps: 12,
   })
   await page.mouse.up()
+}
+
+async function openEditSheet(page: Page, cardName: string) {
+  await page.getByRole('button', { exact: true, name: cardName }).click({ button: 'right' })
+  await expect(page.getByRole('dialog', { name: '编辑卡片' })).toBeVisible()
 }
 
 async function cardOrder(page: Page, first: string, second: string) {

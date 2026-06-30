@@ -11,10 +11,10 @@ const REORDER_ZONE_HEIGHT = 56
 
 export const dropIntentForPoint = (
   point: { x: number; y: number },
-  targetHandleRect: RectLike,
+  targetHandleRect: RectLike | null,
   targetRect?: RectLike,
 ): DropIntent =>
-  pointInRect(point, targetHandleRect) ||
+  Boolean(targetHandleRect && pointInRect(point, targetHandleRect)) ||
   Boolean(targetRect && pointInRect(point, topReorderZone(targetRect)))
     ? 'reorder'
     : 'reparent'
