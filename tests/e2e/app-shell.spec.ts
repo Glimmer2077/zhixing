@@ -41,6 +41,25 @@ test('drills into the seed tree and returns', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
 })
 
+test('returns from a nested card with a downward swipe', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { exact: true, name: '工作' }).click()
+  await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
+
+  const headingBox = await page.getByRole('heading', { name: '工作' }).boundingBox()
+  expect(headingBox).not.toBeNull()
+  const x = headingBox!.x + headingBox!.width / 2
+  const y = headingBox!.y + headingBox!.height / 2
+
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + 8, y + 124, { steps: 8 })
+  await page.mouse.up()
+
+  await expect(page.getByRole('heading', { name: '知行' })).toBeVisible()
+})
+
 test('adds and renames a root card', async ({ page }) => {
   await page.goto('/')
 

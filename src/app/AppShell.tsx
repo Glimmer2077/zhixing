@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useStore } from 'zustand'
 
 import { CardGrid } from '../features/cards/CardGrid'
@@ -11,6 +11,7 @@ import {
 } from '../features/appearance/theme'
 import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
+import { canStartSwipeBack, shouldTriggerSwipeDownBack } from '../features/navigation/swipeBack'
 import { useNavigation } from '../features/navigation/useNavigation'
 import { indexedDbTreeStorage, type TreeStorage } from '../features/persistence/treeStorage'
 import { exportTreeToJson, importTreeFromJson } from '../features/persistence/treeTransfer'
@@ -55,6 +56,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const [themePreference, setThemePreference] = useState<ThemePreference>(() =>
     readThemePreference(),
   )
+  const swipeStartRef = useRef<{ pointerId: number; x: number; y: number } | null>(null)
   const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const { path, push, pop, reset } = useNavigation()
   const prefersReducedMotion = useReducedMotion()
@@ -137,6 +139,40 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     setEditingId(id)
   }
 
+  const startSwipeBack = (event: ReactPointerEvent<HTMLElement>) => {
+    if (path.length === 0 || editingNode || isSettingsOpen || !canStartSwipeBack(event.target)) {
+      swipeStartRef.current = null
+      return
+    }
+
+    swipeStartRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    }
+  }
+
+  const finishSwipeBack = (event: ReactPointerEvent<HTMLElement>) => {
+    const start = swipeStartRef.current
+    swipeStartRef.current = null
+    if (!start || start.pointerId !== event.pointerId || path.length === 0) {
+      return
+    }
+
+    if (
+      shouldTriggerSwipeDownBack({
+        end: { x: event.clientX, y: event.clientY },
+        start,
+      })
+    ) {
+      pop()
+    }
+  }
+
+  const cancelSwipeBack = () => {
+    swipeStartRef.current = null
+  }
+
   const addCard = (title: string) => {
     applyTreeChange((currentTree) => addNode(currentTree, currentId, { title }).state)
   }
@@ -211,7 +247,13 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   }
 
   return (
-    <main className={styles.shell} aria-label={STRINGS.appName}>
+    <main
+      className={styles.shell}
+      aria-label={STRINGS.appName}
+      onPointerCancel={cancelSwipeBack}
+      onPointerDown={startSwipeBack}
+      onPointerUp={finishSwipeBack}
+    >
       <Header
         title={currentNode?.title ?? null}
         canGoBack={path.length > 0}

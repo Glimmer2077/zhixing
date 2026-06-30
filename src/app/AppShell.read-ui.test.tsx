@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
@@ -28,6 +28,19 @@ describe('AppShell read UI', () => {
 
     expect(screen.getByRole('heading', { name: '知行' })).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: '日常' })).toBeInTheDocument()
+  })
+
+  it('returns from a nested card with a downward swipe gesture', async () => {
+    const user = userEvent.setup()
+    render(<AppShell />)
+
+    await user.click(screen.getByRole('button', { name: '工作' }))
+
+    const heading = screen.getByRole('heading', { name: '工作' })
+    fireEvent.pointerDown(heading, { clientX: 100, clientY: 80, pointerId: 1 })
+    fireEvent.pointerUp(heading, { clientX: 112, clientY: 184, pointerId: 1 })
+
+    expect(await screen.findByRole('heading', { name: '知行' })).toBeInTheDocument()
   })
 
   it('shows the empty state for leaf cards', async () => {

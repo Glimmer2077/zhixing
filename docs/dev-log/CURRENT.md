@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; full zundo-backed undo/redo is
-implemented and verified.
+M5 - polish and acceptance QA in progress; swipe-down back is implemented and
+verified.
 
 ## Current Status
 
@@ -48,24 +48,27 @@ M5 full undo/redo replaces the delete-only undo state with a zundo temporal tree
 history. Structural edits now enter the same history stack, Header exposes undo
 and redo affordances, and transient undo toasts stay out of the way while sheets
 are open.
+M5 swipe-down back adds a downward pointer gesture from non-interactive nested
+screen chrome/content to return to the parent level, while preserving button,
+form, card, and drag interactions.
 
 ## Verification
 
 - `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 112 tests across 23 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 90.85% statements, 81.88%
-  branches, 91.28% functions, 91.12% lines.
+- `./node_modules/.bin/vitest run` - passed: 116 tests across 24 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 91.02% statements, 82.41%
+  branches, 91.00% functions, 91.28% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
-- `CI=1 ./node_modules/.bin/playwright test` - passed: 29 browser checks, with the
+- `CI=1 ./node_modules/.bin/playwright test` - passed: 31 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 full undo/redo.
+- Git commits exist through M5 swipe-down back.
 
 ## Active Decisions
 
@@ -126,16 +129,16 @@ are open.
 - Header undo/redo buttons are the full-history affordance. The transient undo toast
   remains available after edits, but is hidden while edit/settings sheets are open
   so it cannot block mobile sheet actions.
+- Swipe-down back starts only from non-interactive elements, uses an 88px downward
+  threshold with limited horizontal drift, and delegates navigation to the existing
+  `pop()` path.
 
 ## Acceptance Gaps
 
-- Swipe-down back gesture is not implemented; back button, browser/system back, and
-  persisted path are implemented.
 - Export/import works with the v1 schema, but export filename/copy still differs
   from the exact `SPEC.md` examples.
 
 ## Next Steps
 
-1. Close the swipe-down back gesture gap.
-2. Polish export filename/copy against the exact `SPEC.md` examples.
-3. Run another final acceptance pass after the remaining gaps are closed.
+1. Polish export filename/copy against the exact `SPEC.md` examples.
+2. Run another final acceptance pass after the remaining gap is closed.
