@@ -30,6 +30,9 @@ failed with:
 Your current plan does not support GitHub Pages for this repository.
 ```
 
+The follow-up workflow run `28415747573` passed install, typecheck, lint, tests, and
+build, then failed at `Configure Pages` for the same Pages-site enablement blocker.
+
 ## Decision
 
 Keep the repository private. Do not switch it back to public unless the user

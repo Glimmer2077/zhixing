@@ -84,14 +84,17 @@ the GitHub plan/visibility decision.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through final acceptance docs; GitHub Pages deployment wiring is
-  ready for the next commit.
+- Git commits exist through the private GitHub repository status update and
+  `origin/main` is synchronized.
 - `gh repo create zhixing --public --source=. --remote=origin --push ...` - created
   and pushed `Glimmer2077/zhixing`, then the repository was changed to private with
   `gh repo edit Glimmer2077/zhixing --visibility private`.
 - `gh api --method POST repos/Glimmer2077/zhixing/pages -f build_type=workflow` -
   failed with `Your current plan does not support GitHub Pages for this repository`
   after the repository was private.
+- GitHub Actions run `28415747573` passed install, typecheck, lint, tests, and build,
+  then failed at `Configure Pages` because the private repository does not have an
+  enabled Pages site under the current plan.
 
 ## Active Decisions
 
