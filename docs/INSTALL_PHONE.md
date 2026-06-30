@@ -35,6 +35,12 @@ PWA installability depends on a web app manifest and, for normal devices, an HTT
 
 This repository includes `.github/workflows/deploy-pages.yml`.
 
+Current deployment:
+
+```text
+https://glimmer2077.github.io/zhixing/
+```
+
 1. Push the repository to GitHub.
 2. In the GitHub repository, open Settings -> Pages.
 3. Set Build and deployment -> Source to GitHub Actions.

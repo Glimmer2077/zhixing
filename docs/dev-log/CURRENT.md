@@ -61,10 +61,9 @@ GitHub Pages deployment wiring adds `.github/workflows/deploy-pages.yml`, a
 `BASE_PATH`-driven Vite base path, and relative manifest/icon URLs so project-page
 deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
 Remote repository `https://github.com/Glimmer2077/zhixing` exists and tracks
-`origin/main`, but it is private per the user's requirement. GitHub Pages enablement
-failed for the private repository on the current GitHub plan, so the deployment
-target is blocked until the user chooses a private-repo-compatible host or changes
-the GitHub plan/visibility decision.
+`origin/main`. The user later chose to make the repository public so GitHub Pages
+could be used. GitHub Pages is enabled with GitHub Actions as the build source, and
+the deployed PWA is available at `https://glimmer2077.github.io/zhixing/`.
 
 ## Verification
 
@@ -95,6 +94,17 @@ the GitHub plan/visibility decision.
 - GitHub Actions run `28415747573` passed install, typecheck, lint, tests, and build,
   then failed at `Configure Pages` because the private repository does not have an
   enabled Pages site under the current plan.
+- `gh repo edit Glimmer2077/zhixing --visibility public` - changed the repository
+  back to public after the user explicitly approved that tradeoff.
+- `gh api --method POST repos/Glimmer2077/zhixing/pages -f build_type=workflow` -
+  succeeded after the repository became public and returned
+  `https://glimmer2077.github.io/zhixing/`.
+- GitHub Actions run `28416314390` passed install, typecheck, lint, tests, build,
+  Pages artifact upload, and deploy.
+- `curl -I https://glimmer2077.github.io/zhixing/` - returned 200 OK.
+- `curl -I https://glimmer2077.github.io/zhixing/manifest.webmanifest` - returned
+  200 OK.
+- `curl -I https://glimmer2077.github.io/zhixing/sw.js` - returned 200 OK.
 
 ## Active Decisions
 
@@ -166,10 +176,9 @@ the GitHub plan/visibility decision.
   the repository name for normal project pages, uses `/` for `<owner>.github.io`
   root repositories, and allows a `PAGES_BASE_PATH` repository variable override for
   custom-domain root deployments.
-- The source repository must remain private. Under the current GitHub account plan,
-  that blocks GitHub Pages for `Glimmer2077/zhixing`; keep the repository private and
-  prefer a host that can deploy from a private GitHub repository unless the user
-  explicitly changes this decision.
+- The source repository is public by user decision so GitHub Pages can host the PWA.
+  Do not switch it back to private without also choosing a different deployment
+  target or GitHub plan that supports private-repository Pages.
 
 ## Acceptance Gaps
 
@@ -177,7 +186,8 @@ the GitHub plan/visibility decision.
 
 ## Next Steps
 
-1. Commit and push the private-repository deployment status update.
-2. Choose a private-repo-compatible HTTPS host such as Vercel, Netlify, or Cloudflare
-   Pages, or change GitHub account/visibility constraints.
-3. Deploy and verify the installed PWA on a phone.
+1. Commit and push the public GitHub Pages deployment status update.
+2. Open `https://glimmer2077.github.io/zhixing/` on a phone and add it to the Home
+   Screen.
+3. Verify installed PWA launch, persistence, offline shell load, and JSON export on
+   the phone.
