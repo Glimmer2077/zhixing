@@ -6,12 +6,26 @@ import styles from './Header.module.css'
 interface HeaderProps {
   title: string | null
   canGoBack: boolean
+  canRedo?: boolean
+  canUndo?: boolean
   onBack: () => void
+  onRedo?: () => void
   onSettings: () => void
+  onUndo?: () => void
   settingsButtonRef?: Ref<HTMLButtonElement>
 }
 
-export function Header({ title, canGoBack, onBack, onSettings, settingsButtonRef }: HeaderProps) {
+export function Header({
+  title,
+  canGoBack,
+  canRedo = false,
+  canUndo = false,
+  onBack,
+  onRedo,
+  onSettings,
+  onUndo,
+  settingsButtonRef,
+}: HeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -22,15 +36,39 @@ export function Header({ title, canGoBack, onBack, onSettings, settingsButtonRef
         ) : null}
         <h1 className={styles.title}>{title ?? STRINGS.wordmark}</h1>
       </div>
-      <button
-        className={styles.settings}
-        ref={settingsButtonRef}
-        type="button"
-        aria-label={STRINGS.settings}
-        onClick={onSettings}
-      >
-        <span aria-hidden="true">…</span>
-      </button>
+      <div className={styles.actions}>
+        {canUndo ? (
+          <button
+            aria-label={STRINGS.undoAction}
+            className={styles.history}
+            onClick={onUndo}
+            title={STRINGS.undoAction}
+            type="button"
+          >
+            <span aria-hidden="true">↶</span>
+          </button>
+        ) : null}
+        {canRedo ? (
+          <button
+            aria-label={STRINGS.redoAction}
+            className={styles.history}
+            onClick={onRedo}
+            title={STRINGS.redoAction}
+            type="button"
+          >
+            <span aria-hidden="true">↷</span>
+          </button>
+        ) : null}
+        <button
+          className={styles.settings}
+          ref={settingsButtonRef}
+          type="button"
+          aria-label={STRINGS.settings}
+          onClick={onSettings}
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
     </header>
   )
 }

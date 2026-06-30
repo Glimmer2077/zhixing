@@ -57,6 +57,21 @@ test('adds and renames a root card', async ({ page }) => {
   await expect(page.getByRole('button', { exact: true, name: '项目集' })).toBeVisible()
 })
 
+test('undoes and redoes a structural edit from the header', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '添加领域' }).click()
+  await page.getByLabel('新卡片标题').fill('项目')
+  await page.getByLabel('新卡片标题').press('Enter')
+  await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeVisible()
+
+  await page.getByRole('button', { name: '撤销上一步' }).click()
+  await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeHidden()
+
+  await page.getByRole('button', { name: '重做上一步' }).click()
+  await expect(page.getByRole('button', { exact: true, name: '项目' })).toBeVisible()
+})
+
 test('reorders root cards by dragging the sort handle', async ({ page }) => {
   await page.goto('/')
 

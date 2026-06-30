@@ -13,6 +13,14 @@
   gap: var(--s2);
 }
 
+.actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--s1);
+  margin-right: -10px;
+}
+
 .title {
   min-width: 0;
   margin: 0;
@@ -27,6 +35,7 @@
 }
 
 .back,
+.history,
 .settings {
   display: grid;
   flex: 0 0 auto;
@@ -40,16 +49,21 @@
   line-height: 1;
 }
 
+.history {
+  color: var(--text-2);
+  font-size: 20px;
+}
+
 .back {
   margin-left: -10px;
 }
 
 .settings {
-  margin-right: -10px;
   color: var(--text-2);
 }
 
 .back:focus-visible,
+.history:focus-visible,
 .settings:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;

@@ -37,7 +37,11 @@ export const STRINGS = {
   delete: '删除',
   confirmDelete: '确认删除',
   undo: '撤销',
+  redo: '重做',
+  undoAction: '撤销上一步',
+  redoAction: '重做上一步',
   deletedUndo: '已删除 · 撤销',
+  changedUndo: '已更改 · 撤销',
   emptyTitle: '还没有卡片',
   emptyBody: '点下面的「添加」，放进第一张。',
 } as const

@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; drag-to-parent reparent is implemented
-and ready to commit.
+M5 - polish and acceptance QA in progress; full zundo-backed undo/redo is
+implemented and verified.
 
 ## Current Status
 
@@ -44,25 +44,28 @@ overrides through `html[data-theme]`.
 M5 drag-to-parent reparent adds card-body drop behavior: dragging to a target
 card's top/handle area keeps same-level reorder, while dragging into the card body
 moves the active card under that target with a visible drop outline.
+M5 full undo/redo replaces the delete-only undo state with a zundo temporal tree
+history. Structural edits now enter the same history stack, Header exposes undo
+and redo affordances, and transient undo toasts stay out of the way while sheets
+are open.
 
 ## Verification
 
 - `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 104 tests across 21 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 90.16% statements, 81.42%
-  branches, 90.55% functions, 90.49% lines.
+- `./node_modules/.bin/vitest run` - passed: 112 tests across 23 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 90.85% statements, 81.88%
+  branches, 91.28% functions, 91.12% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
-- `CI= ./node_modules/.bin/playwright test` - passed: 27 browser checks, with the
+- `CI=1 ./node_modules/.bin/playwright test` - passed: 29 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 appearance controls; M5 drag-to-parent reparent is
-  implemented and verified for the next commit.
+- Git commits exist through M5 full undo/redo.
 
 ## Active Decisions
 
@@ -117,11 +120,15 @@ moves the active card under that target with a visible drop outline.
 - Dragging onto a target card's top/handle zone is treated as same-level reorder;
   dragging into the card body is treated as reparent. This keeps existing sort
   handles usable while adding the requested card-body drop affordance.
+- Tree history is isolated in a small zundo temporal store per `AppShell` instance;
+  IndexedDB hydration replaces state without creating undo history, while user
+  edits are tracked.
+- Header undo/redo buttons are the full-history affordance. The transient undo toast
+  remains available after edits, but is hidden while edit/settings sheets are open
+  so it cannot block mobile sheet actions.
 
 ## Acceptance Gaps
 
-- Undo is currently a single delete undo toast, not full zundo-backed undo/redo for
-  every structural change.
 - Swipe-down back gesture is not implemented; back button, browser/system back, and
   persisted path are implemented.
 - Export/import works with the v1 schema, but export filename/copy still differs
@@ -129,6 +136,6 @@ moves the active card under that target with a visible drop outline.
 
 ## Next Steps
 
-1. Commit M5 drag-to-parent reparent.
-2. Decide which acceptance gap to close next: full undo/redo, swipe-down back, or export/copy polish.
-3. Run another final acceptance pass after the chosen gap is closed.
+1. Close the swipe-down back gesture gap.
+2. Polish export filename/copy against the exact `SPEC.md` examples.
+3. Run another final acceptance pass after the remaining gaps are closed.
