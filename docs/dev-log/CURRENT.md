@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; tracked major acceptance gaps are closed
-and verified.
+M5 - polish and acceptance QA in progress; tracked major acceptance gaps are closed,
+verified, and documented for phone installation.
 
 ## Current Status
 
@@ -54,6 +54,9 @@ form, card, and drag interactions.
 M5 export/copy polish aligns Settings copy and export naming with the spec: Settings
 uses `导出` / `导入`, import failures show the full recovery hint, and downloads use
 `知行-YYYYMMDD.json`.
+Final acceptance documentation now records the latest verification pass in
+`docs/ACCEPTANCE.md`, and `docs/INSTALL_PHONE.md` explains the HTTPS-hosted PWA
+installation path for iPhone and Android.
 
 ## Verification
 
@@ -71,7 +74,8 @@ uses `导出` / `导入`, import failures show the full recovery hint, and downl
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 export/copy polish.
+- Git commits exist through M5 export/copy polish; final acceptance and phone
+  installation docs are ready for the next commit.
 
 ## Active Decisions
 
@@ -146,5 +150,5 @@ uses `导出` / `导入`, import failures show the full recovery hint, and downl
 
 ## Next Steps
 
-1. Run a final acceptance pass against `SPEC.md`.
-2. Prepare concise install-to-phone instructions for the current PWA build.
+1. Commit final acceptance and phone installation docs.
+2. Decide whether to deploy the current `dist/` build to a public HTTPS host.

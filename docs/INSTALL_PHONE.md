@@ -1,0 +1,67 @@
+# Install To Phone
+
+知行 is a PWA. The phone installs it from a real HTTPS website, not from the local `127.0.0.1` development URL.
+
+## Build
+
+```bash
+pnpm build
+```
+
+The production files are generated in `dist/`.
+
+## Host
+
+Upload the contents of `dist/` to any HTTPS static host:
+
+- Vercel
+- Netlify
+- Cloudflare Pages
+- GitHub Pages
+- Your own Nginx/Caddy static server with TLS
+
+The hosted site must serve these files from the same origin:
+
+- `index.html`
+- `manifest.webmanifest`
+- `sw.js`
+- `workbox-*.js`
+- `assets/*`
+- `icons/*`
+
+PWA installability depends on a web app manifest and, for normal devices, an HTTPS origin. `localhost` / `127.0.0.1` is only a development exception on the same machine.
+
+## Install On iPhone
+
+1. Open the HTTPS site URL on the iPhone.
+2. Use Safari for the safest path.
+3. Tap Share.
+4. Tap Add to Home Screen.
+5. Keep the name `知行`, then tap Add.
+6. Launch it from the new Home Screen icon.
+
+On iOS 16.4 and later, other browsers can also expose Add to Home Screen from the share menu, but Safari remains the least ambiguous install path.
+
+## Install On Android
+
+1. Open the HTTPS site URL in Chrome.
+2. Use the browser menu or the install prompt.
+3. Tap Install app or Add to Home screen.
+4. Launch it from the new Home Screen icon.
+
+## Verify After Installing
+
+1. Open the Home Screen icon and confirm it launches as `知行`.
+2. Add a test card.
+3. Close and reopen the app; the card should still be there.
+4. Turn on airplane mode and reopen; the app shell should still load after the first successful online visit.
+5. Open Settings and tap Export to create a JSON backup.
+
+## Backup Rule
+
+All card data is private and local to that device. There is no server copy. Before deleting the Home Screen app, clearing browser data, changing phones, or reinstalling, export JSON from Settings and keep the file somewhere safe.
+
+## References
+
+- MDN PWA installability: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+- web.dev PWA installation: https://web.dev/learn/pwa/installation
