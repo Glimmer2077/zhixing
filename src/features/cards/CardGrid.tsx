@@ -6,6 +6,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragMoveEvent,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -14,10 +15,11 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { STRINGS } from '../../strings'
 import type { Node } from '../tree/types'
+import { reparentTargetFor, shouldReorder } from './dragDrop'
 import { distribute, totalColumnHeight } from './masonry'
 import { Card } from './Card'
 import styles from './CardGrid.module.css'
@@ -28,10 +30,22 @@ interface CardGridProps {
   onAdd: (title: string) => void
   onEdit: (id: string) => void
   onOpen: (id: string) => void
+  onReparent: (activeId: string, targetParentId: string) => void
   onReorder: (activeId: string, overId: string) => void
 }
 
-export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen, onReorder }: CardGridProps) {
+export function CardGrid({
+  nodes,
+  addLabel,
+  onAdd,
+  onEdit,
+  onOpen,
+  onReparent,
+  onReorder,
+}: CardGridProps) {
+  const dragHandleRefs = useRef(new Map<string, HTMLButtonElement>())
+  const lastPointerPointRef = useRef<{ x: number; y: number } | null>(null)
+  const [reparentTargetId, setReparentTargetId] = useState<string | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -39,12 +53,49 @@ export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen, onReorder }: 
 
   const itemIds = nodes.map((node) => node.id)
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  useEffect(() => {
+    const trackPointer = (event: MouseEvent | PointerEvent) => {
+      lastPointerPointRef.current = { x: event.clientX, y: event.clientY }
+    }
+
+    const trackTouch = (event: TouchEvent) => {
+      const touch = event.touches[0] ?? event.changedTouches[0]
+      if (touch) {
+        lastPointerPointRef.current = { x: touch.clientX, y: touch.clientY }
+      }
+    }
+
+    window.addEventListener('mousemove', trackPointer)
+    window.addEventListener('pointermove', trackPointer)
+    window.addEventListener('touchmove', trackTouch, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', trackPointer)
+      window.removeEventListener('pointermove', trackPointer)
+      window.removeEventListener('touchmove', trackTouch)
+    }
+  }, [])
+
+  const handleDragMove = (event: DragMoveEvent) => {
+    setReparentTargetId(
+      reparentTargetFor(event, dragHandleRefs.current, lastPointerPointRef.current),
+    )
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setReparentTargetId(null)
     if (!over || active.id === over.id) {
       return
     }
 
-    onReorder(String(active.id), String(over.id))
+    const activeId = String(active.id)
+    const targetId = String(over.id)
+    if (shouldReorder(event, dragHandleRefs.current, lastPointerPointRef.current)) {
+      onReorder(activeId, targetId)
+      return
+    }
+
+    onReparent(activeId, targetId)
   }
 
   if (nodes.length === 0) {
@@ -63,13 +114,32 @@ export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen, onReorder }: 
   const addColumn = totalColumnHeight(columns[0]) <= totalColumnHeight(columns[1]) ? 0 : 1
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+    <DndContext
+      collisionDetection={closestCenter}
+      onDragCancel={() => setReparentTargetId(null)}
+      onDragEnd={handleDragEnd}
+      onDragMove={handleDragMove}
+      sensors={sensors}
+    >
       <SortableContext items={itemIds} strategy={rectSortingStrategy}>
         <div className={styles.grid} role="list" aria-label={STRINGS.cardGrid}>
           {columns.map((column, columnIndex) => (
             <div className={styles.column} key={columnIndex}>
               {column.map((node) => (
-                <SortableCardItem key={node.id} node={node} onEdit={onEdit} onOpen={onOpen} />
+                <SortableCardItem
+                  isReparentTarget={reparentTargetId === node.id}
+                  key={node.id}
+                  node={node}
+                  onEdit={onEdit}
+                  onOpen={onOpen}
+                  onRegisterDragHandle={(element) => {
+                    if (element) {
+                      dragHandleRefs.current.set(node.id, element)
+                      return
+                    }
+                    dragHandleRefs.current.delete(node.id)
+                  }}
+                />
               ))}
               {addColumn === columnIndex ? (
                 <div className={styles.item} key="add" role="listitem">
@@ -85,12 +155,20 @@ export function CardGrid({ nodes, addLabel, onAdd, onEdit, onOpen, onReorder }: 
 }
 
 interface SortableCardItemProps {
+  isReparentTarget: boolean
   node: Node
   onEdit: (id: string) => void
   onOpen: (id: string) => void
+  onRegisterDragHandle: (element: HTMLButtonElement | null) => void
 }
 
-function SortableCardItem({ node, onEdit, onOpen }: SortableCardItemProps) {
+function SortableCardItem({
+  isReparentTarget,
+  node,
+  onEdit,
+  onOpen,
+  onRegisterDragHandle,
+}: SortableCardItemProps) {
   const {
     attributes,
     isDragging,
@@ -105,7 +183,8 @@ function SortableCardItem({ node, onEdit, onOpen }: SortableCardItemProps) {
     <div
       className={`${styles.item} ${styles.sortableItem} ${
         isDragging ? styles.dragging : ''
-      }`.trim()}
+      } ${isReparentTarget ? styles.reparentTarget : ''}`.trim()}
+      data-reparent-target-id={node.id}
       ref={setNodeRef}
       role="listitem"
       style={{
@@ -119,7 +198,10 @@ function SortableCardItem({ node, onEdit, onOpen }: SortableCardItemProps) {
         {...listeners}
         aria-label={`${STRINGS.reorder} ${node.title}`}
         className={styles.dragHandle}
-        ref={setActivatorNodeRef}
+        ref={(element) => {
+          setActivatorNodeRef(element)
+          onRegisterDragHandle(element)
+        }}
         type="button"
       >
         <span aria-hidden="true">⋮⋮</span>

@@ -26,6 +26,12 @@
   opacity: 0.72;
 }
 
+.reparentTarget {
+  border-radius: var(--r-card);
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
 .dragHandle {
   position: absolute;
   top: var(--s2);

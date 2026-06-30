@@ -131,6 +131,16 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     setTree((currentTree) => reorderSiblingsById(currentTree, currentId, activeId, overId))
   }
 
+  const reparentCard = (activeId: string, targetParentId: string) => {
+    if (activeId === targetParentId) {
+      return
+    }
+    setUndoState(null)
+    setTree((currentTree) =>
+      moveNode(currentTree, activeId, targetParentId, Number.POSITIVE_INFINITY),
+    )
+  }
+
   const deleteNode = (id: string) => {
     setUndoState(tree)
     setTree(removeNode(tree, id))
@@ -207,6 +217,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
             onAdd={addCard}
             onEdit={setEditingId}
             onOpen={push}
+            onReparent={reparentCard}
             onReorder={reorderCards}
           />
         </motion.section>

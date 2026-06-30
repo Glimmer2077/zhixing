@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 
 import { CardGrid } from './CardGrid'
+import { dropIntentForPoint } from './dropIntent'
 import type { Node } from '../tree/types'
 
 const nodes: Node[] = [
@@ -29,6 +30,7 @@ describe('CardGrid', () => {
         onAdd={() => undefined}
         onEdit={() => undefined}
         onOpen={() => undefined}
+        onReparent={() => undefined}
         onReorder={() => undefined}
       />,
     )
@@ -49,6 +51,7 @@ describe('CardGrid', () => {
         onAdd={() => undefined}
         onEdit={() => undefined}
         onOpen={() => undefined}
+        onReparent={() => undefined}
         onReorder={() => undefined}
       />,
     )
@@ -56,5 +59,14 @@ describe('CardGrid', () => {
     expect(screen.getByText('还没有卡片')).toBeInTheDocument()
     expect(screen.getByText('点下面的「添加」，放进第一张。')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '添加' })).toBeEnabled()
+  })
+
+  it('classifies handle drops as reorder and card-body drops as reparent', () => {
+    const handleRect = new DOMRect(8, 8, 36, 36)
+    const targetRect = new DOMRect(0, 0, 160, 180)
+
+    expect(dropIntentForPoint({ x: 26, y: 26 }, handleRect)).toBe('reorder')
+    expect(dropIntentForPoint({ x: 120, y: 40 }, handleRect, targetRect)).toBe('reorder')
+    expect(dropIntentForPoint({ x: 92, y: 92 }, handleRect, targetRect)).toBe('reparent')
   })
 })

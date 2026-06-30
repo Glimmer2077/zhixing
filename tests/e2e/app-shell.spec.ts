@@ -74,6 +74,25 @@ test('reorders root cards by dragging the sort handle', async ({ page }) => {
   await expect.poll(() => cardOrder(page, '日常', '工作')).toBe('日常-first')
 })
 
+test('reparents a card by dragging it onto another card', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '日常' })).toBeVisible()
+
+  await dragBetween(
+    page,
+    page.getByRole('button', { name: '排序 工作' }),
+    page.getByRole('button', { exact: true, name: '日常' }),
+  )
+
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeHidden()
+
+  await page.getByRole('button', { exact: true, name: '日常' }).click()
+  await expect(page.getByRole('heading', { name: '日常' })).toBeVisible()
+  await expect(page.getByRole('button', { exact: true, name: '工作' })).toBeVisible()
+})
+
 test('moves a child card to the root level', async ({ page }) => {
   await page.goto('/')
 
@@ -97,6 +116,7 @@ test('keeps added cards after reload', async ({ page }) => {
   await page.getByLabel('新卡片标题').fill('长期项目')
   await page.getByLabel('新卡片标题').press('Enter')
   await expect(page.getByRole('button', { exact: true, name: '长期项目' })).toBeVisible()
+  await waitForStoredCard(page, '长期项目')
 
   await page.reload()
 
@@ -228,6 +248,34 @@ async function cardOrder(page: Page, first: string, second: string) {
     return `${first}-first`
   }
   return `${second}-first`
+}
+
+async function waitForStoredCard(page: Page, title: string) {
+  const escapedTitle = JSON.stringify(title)
+  await expect
+    .poll(() =>
+      page.evaluate(`
+        new Promise((resolve) => {
+          const request = indexedDB.open('keyval-store')
+          request.onerror = () => resolve(false)
+          request.onsuccess = () => {
+            const db = request.result
+            const transaction = db.transaction('keyval', 'readonly')
+            const getRequest = transaction.objectStore('keyval').get('zhixing.tree.v1')
+            getRequest.onerror = () => resolve(false)
+            getRequest.onsuccess = () => {
+              const tree = getRequest.result
+              resolve(Boolean(
+                tree &&
+                tree.nodes &&
+                Object.values(tree.nodes).some((node) => node && node.title === ${escapedTitle})
+              ))
+            }
+          }
+        })
+      `),
+    )
+    .toBe(true)
 }
 
 async function waitForServiceWorkerControl(page: Page) {

@@ -7,7 +7,7 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; appearance controls are implemented
+M5 - polish and acceptance QA in progress; drag-to-parent reparent is implemented
 and ready to commit.
 
 ## Current Status
@@ -41,24 +41,27 @@ headings, and disables tap scaling when reduced motion is requested.
 M5 appearance controls add the Settings `外观` section with `跟随系统` / `浅色` /
 `深色`, persist the preference in localStorage, and apply explicit light/dark
 overrides through `html[data-theme]`.
+M5 drag-to-parent reparent adds card-body drop behavior: dragging to a target
+card's top/handle area keeps same-level reorder, while dragging into the card body
+moves the active card under that target with a visible drop outline.
 
 ## Verification
 
 - `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 103 tests across 21 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 92.28% statements, 83.17%
-  branches, 92.63% functions, 92.61% lines.
+- `./node_modules/.bin/vitest run` - passed: 104 tests across 21 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 90.16% statements, 81.42%
+  branches, 90.55% functions, 90.49% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
-- `CI= ./node_modules/.bin/playwright test` - passed: 25 browser checks, with the
+- `CI= ./node_modules/.bin/playwright test` - passed: 27 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 safe-area/a11y/motion QA; M5 appearance controls are
+- Git commits exist through M5 appearance controls; M5 drag-to-parent reparent is
   implemented and verified for the next commit.
 
 ## Active Decisions
@@ -78,11 +81,9 @@ overrides through `html[data-theme]`.
 - M3 first slice includes add, edit sheet, delete confirmation, and single-step undo.
 - M3 same-level drag reorder uses `dnd-kit` handles and the existing tree `reorder`
   operation.
-- M3 cross-parent reparent uses the edit sheet parent selector. It appends the moved
-  card to the target parent's child list and excludes the current node plus descendants
-  from valid targets.
-- Full drag-to-parent interactions are deferred until the UI has a multi-level move
-  surface.
+- M3 cross-parent reparent is available through both the edit sheet parent selector
+  and drag-to-parent card-body drops. Reparent appends the moved card to the target
+  parent's child list and tree operations retain the cycle guard.
 - M4 persistence uses a small `TreeStorage` interface with an IndexedDB implementation
   powered by `idb-keyval`.
 - AppShell does not save until storage hydration completes, so first-run seed state
@@ -113,11 +114,12 @@ overrides through `html[data-theme]`.
 - Theme preference key is `zhixing.theme.v1`; `system` removes `data-theme` so the
   existing `prefers-color-scheme` CSS remains authoritative.
 - Explicit `light` and `dark` write `html[data-theme]` overrides and survive reload.
+- Dragging onto a target card's top/handle zone is treated as same-level reorder;
+  dragging into the card body is treated as reparent. This keeps existing sort
+  handles usable while adding the requested card-body drop affordance.
 
 ## Acceptance Gaps
 
-- Reparent is currently available through the edit sheet parent selector, not by
-  dragging a card onto another card with a drop affordance.
 - Undo is currently a single delete undo toast, not full zundo-backed undo/redo for
   every structural change.
 - Swipe-down back gesture is not implemented; back button, browser/system back, and
@@ -127,6 +129,6 @@ overrides through `html[data-theme]`.
 
 ## Next Steps
 
-1. Commit M5 appearance controls.
-2. Decide which acceptance gap to close next: drag-to-parent reparent, full undo/redo, swipe-down back, or export/copy polish.
+1. Commit M5 drag-to-parent reparent.
+2. Decide which acceptance gap to close next: full undo/redo, swipe-down back, or export/copy polish.
 3. Run another final acceptance pass after the chosen gap is closed.
