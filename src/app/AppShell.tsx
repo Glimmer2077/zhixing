@@ -13,6 +13,7 @@ import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { canStartSwipeBack, shouldTriggerSwipeDownBack } from '../features/navigation/swipeBack'
 import { useNavigation } from '../features/navigation/useNavigation'
+import { exportFileName } from '../features/persistence/exportFileName'
 import { indexedDbTreeStorage, type TreeStorage } from '../features/persistence/treeStorage'
 import { exportTreeToJson, importTreeFromJson } from '../features/persistence/treeTransfer'
 import { SettingsSheet } from '../features/settings/SettingsSheet'
@@ -218,7 +219,7 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `zhixing-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.download = exportFileName()
     document.body.append(anchor)
     anchor.click()
     anchor.remove()

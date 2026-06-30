@@ -174,7 +174,7 @@ test('imports a JSON tree from settings', async ({ page }) => {
   await page.goto('/')
 
   await page.getByRole('button', { name: '设置' }).click()
-  await page.getByLabel('导入 JSON').setInputFiles({
+  await page.getByLabel('导入').setInputFiles({
     name: 'zhixing.json',
     mimeType: 'application/json',
     buffer: Buffer.from(

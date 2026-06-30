@@ -20,9 +20,9 @@ describe('SettingsSheet', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: '导出 JSON' }))
+    await user.click(screen.getByRole('button', { name: '导出' }))
     await user.upload(
-      screen.getByLabelText('导入 JSON'),
+      screen.getByLabelText('导入'),
       new File(['{}'], 'zhixing.json', { type: 'application/json' }),
     )
 
@@ -50,7 +50,7 @@ describe('SettingsSheet', () => {
     )
 
     await user.upload(
-      screen.getByLabelText('导入 JSON'),
+      screen.getByLabelText('导入'),
       new File(['{}'], 'zhixing.json', { type: 'application/json' }),
     )
     await user.click(screen.getByRole('button', { name: '取消' }))
@@ -102,7 +102,7 @@ describe('SettingsSheet', () => {
   it('shows import errors', () => {
     render(
       <SettingsSheet
-        importError="导入失败"
+        importError="文件无法读取，请检查是否为知行导出的 JSON"
         onClose={() => undefined}
         onExport={() => undefined}
         onImportFile={() => undefined}
@@ -110,7 +110,7 @@ describe('SettingsSheet', () => {
       />,
     )
 
-    expect(screen.getByRole('alert')).toHaveTextContent('导入失败')
+    expect(screen.getByRole('alert')).toHaveTextContent('文件无法读取，请检查是否为知行导出的 JSON')
   })
 
   it('requires confirmation before resetting data', async () => {

@@ -97,7 +97,7 @@ describe('AppShell', () => {
 
     await user.click(screen.getByRole('button', { name: '设置' }))
     await user.upload(
-      screen.getByLabelText('导入 JSON'),
+      screen.getByLabelText('导入'),
       new File([exportTreeToJson(persistedTree)], 'zhixing.json', { type: 'application/json' }),
     )
     expect(screen.getByText('导入将替换当前全部内容，确定吗？')).toBeInTheDocument()
@@ -111,7 +111,12 @@ describe('AppShell', () => {
     const user = userEvent.setup()
     const createObjectUrl = vi.fn(() => 'blob:zhixing')
     const revokeObjectUrl = vi.fn()
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+    const downloads: string[] = []
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      downloads.push(this.download)
+    })
     const originalCreateObjectUrl = Object.getOwnPropertyDescriptor(URL, 'createObjectURL')
     const originalRevokeObjectUrl = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL')
     Object.defineProperty(URL, 'createObjectURL', {
@@ -127,10 +132,11 @@ describe('AppShell', () => {
       render(<AppShell storage={createMemoryTreeStorage()} />)
 
       await user.click(screen.getByRole('button', { name: '设置' }))
-      await user.click(screen.getByRole('button', { name: '导出 JSON' }))
+      await user.click(screen.getByRole('button', { name: '导出' }))
 
       expect(createObjectUrl).toHaveBeenCalledWith(expect.any(Blob))
       expect(click).toHaveBeenCalledTimes(1)
+      expect(downloads[0]).toMatch(/^知行-\d{8}\.json$/)
       expect(revokeObjectUrl).toHaveBeenCalledWith('blob:zhixing')
     } finally {
       if (originalCreateObjectUrl) {
@@ -154,12 +160,14 @@ describe('AppShell', () => {
 
     await user.click(screen.getByRole('button', { name: '设置' }))
     await user.upload(
-      screen.getByLabelText('导入 JSON'),
+      screen.getByLabelText('导入'),
       new File(['not json'], 'bad.json', { type: 'application/json' }),
     )
     await user.click(screen.getByRole('button', { name: '确认导入' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('导入失败')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '文件无法读取，请检查是否为知行导出的 JSON',
+    )
     expect(screen.getByRole('button', { name: '工作' })).toBeInTheDocument()
   })
 

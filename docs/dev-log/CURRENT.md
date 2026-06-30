@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; swipe-down back is implemented and
-verified.
+M5 - polish and acceptance QA in progress; tracked major acceptance gaps are closed
+and verified.
 
 ## Current Status
 
@@ -51,15 +51,18 @@ are open.
 M5 swipe-down back adds a downward pointer gesture from non-interactive nested
 screen chrome/content to return to the parent level, while preserving button,
 form, card, and drag interactions.
+M5 export/copy polish aligns Settings copy and export naming with the spec: Settings
+uses `导出` / `导入`, import failures show the full recovery hint, and downloads use
+`知行-YYYYMMDD.json`.
 
 ## Verification
 
 - `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 116 tests across 24 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 91.02% statements, 82.41%
-  branches, 91.00% functions, 91.28% lines.
+- `./node_modules/.bin/vitest run` - passed: 117 tests across 25 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 91.08% statements, 82.45%
+  branches, 91.04% functions, 91.34% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
 - `CI=1 ./node_modules/.bin/playwright test` - passed: 31 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
@@ -68,7 +71,7 @@ form, card, and drag interactions.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 swipe-down back.
+- Git commits exist through M5 export/copy polish.
 
 ## Active Decisions
 
@@ -132,13 +135,16 @@ form, card, and drag interactions.
 - Swipe-down back starts only from non-interactive elements, uses an 88px downward
   threshold with limited horizontal drift, and delegates navigation to the existing
   `pop()` path.
+- Export filenames use local-date components, not ISO strings, so the visible
+  download format is `知行-YYYYMMDD.json`.
+- Settings action copy follows the §10 short labels `导出` and `导入`; JSON remains
+  implied by the Settings context and file accept type.
 
 ## Acceptance Gaps
 
-- Export/import works with the v1 schema, but export filename/copy still differs
-  from the exact `SPEC.md` examples.
+- No major v1 acceptance gaps are currently tracked in this log.
 
 ## Next Steps
 
-1. Polish export filename/copy against the exact `SPEC.md` examples.
-2. Run another final acceptance pass after the remaining gap is closed.
+1. Run a final acceptance pass against `SPEC.md`.
+2. Prepare concise install-to-phone instructions for the current PWA build.
