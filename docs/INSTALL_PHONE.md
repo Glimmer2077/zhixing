@@ -55,6 +55,14 @@ For a root Pages repository named `<user-or-org>.github.io`, the workflow uses
 If the project later uses a custom domain at the site root, set a GitHub repository
 variable named `PAGES_BASE_PATH` to `/`.
 
+If the GitHub repository must stay private, confirm that the GitHub account plan
+supports Pages for private repositories. The repository `Glimmer2077/zhixing` was
+made private on 2026-06-30, and GitHub returned `Your current plan does not support
+GitHub Pages for this repository` when enabling Pages for that private repository.
+In that case, use a host that supports deploying from private repositories, such
+as Vercel, Netlify, or Cloudflare Pages, while keeping the deployed PWA URL public
+for installation.
+
 ## Install On iPhone
 
 1. Open the HTTPS site URL on the iPhone.

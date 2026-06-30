@@ -60,6 +60,11 @@ installation path for iPhone and Android.
 GitHub Pages deployment wiring adds `.github/workflows/deploy-pages.yml`, a
 `BASE_PATH`-driven Vite base path, and relative manifest/icon URLs so project-page
 deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
+Remote repository `https://github.com/Glimmer2077/zhixing` exists and tracks
+`origin/main`, but it is private per the user's requirement. GitHub Pages enablement
+failed for the private repository on the current GitHub plan, so the deployment
+target is blocked until the user chooses a private-repo-compatible host or changes
+the GitHub plan/visibility decision.
 
 ## Verification
 
@@ -81,6 +86,12 @@ deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
 - Git commits exist through final acceptance docs; GitHub Pages deployment wiring is
   ready for the next commit.
+- `gh repo create zhixing --public --source=. --remote=origin --push ...` - created
+  and pushed `Glimmer2077/zhixing`, then the repository was changed to private with
+  `gh repo edit Glimmer2077/zhixing --visibility private`.
+- `gh api --method POST repos/Glimmer2077/zhixing/pages -f build_type=workflow` -
+  failed with `Your current plan does not support GitHub Pages for this repository`
+  after the repository was private.
 
 ## Active Decisions
 
@@ -152,6 +163,10 @@ deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
   the repository name for normal project pages, uses `/` for `<owner>.github.io`
   root repositories, and allows a `PAGES_BASE_PATH` repository variable override for
   custom-domain root deployments.
+- The source repository must remain private. Under the current GitHub account plan,
+  that blocks GitHub Pages for `Glimmer2077/zhixing`; keep the repository private and
+  prefer a host that can deploy from a private GitHub repository unless the user
+  explicitly changes this decision.
 
 ## Acceptance Gaps
 
@@ -159,6 +174,7 @@ deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
 
 ## Next Steps
 
-1. Commit GitHub Pages deployment wiring.
-2. Push the repository to GitHub, enable Pages with GitHub Actions as the source,
-   and verify the installed PWA on a phone.
+1. Commit and push the private-repository deployment status update.
+2. Choose a private-repo-compatible HTTPS host such as Vercel, Netlify, or Cloudflare
+   Pages, or change GitHub account/visibility constraints.
+3. Deploy and verify the installed PWA on a phone.
