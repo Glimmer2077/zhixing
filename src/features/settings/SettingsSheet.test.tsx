@@ -75,6 +75,30 @@ describe('SettingsSheet', () => {
     expect(screen.getByText('本地优先，无账号，无后端。')).toBeInTheDocument()
   })
 
+  it('shows appearance controls and reports preference changes', async () => {
+    const user = userEvent.setup()
+    const onThemePreferenceChange = vi.fn()
+
+    render(
+      <SettingsSheet
+        importError={null}
+        onClose={() => undefined}
+        onExport={() => undefined}
+        onImportFile={() => undefined}
+        onReset={() => undefined}
+        onThemePreferenceChange={onThemePreferenceChange}
+        themePreference="system"
+      />,
+    )
+
+    expect(screen.getByRole('group', { name: '外观' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: '跟随系统' })).toBeChecked()
+
+    await user.click(screen.getByRole('radio', { name: '深色' }))
+
+    expect(onThemePreferenceChange).toHaveBeenCalledWith('dark')
+  })
+
   it('shows import errors', () => {
     render(
       <SettingsSheet

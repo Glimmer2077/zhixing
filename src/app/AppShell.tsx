@@ -2,6 +2,12 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { CardGrid } from '../features/cards/CardGrid'
+import {
+  applyThemePreference,
+  readThemePreference,
+  writeThemePreference,
+  type ThemePreference,
+} from '../features/appearance/theme'
 import { EditSheet, type ParentOption } from '../features/editing/EditSheet'
 import { Header } from '../features/navigation/Header'
 import { useNavigation } from '../features/navigation/useNavigation'
@@ -36,6 +42,9 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [undoState, setUndoState] = useState<TreeState | null>(null)
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() =>
+    readThemePreference(),
+  )
   const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const { path, push, pop, reset } = useNavigation()
   const prefersReducedMotion = useReducedMotion()
@@ -87,6 +96,11 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
 
     reset()
   }, [hasHydrated, path, reset, tree])
+
+  useEffect(() => {
+    applyThemePreference(themePreference)
+    writeThemePreference(themePreference)
+  }, [themePreference])
 
   const addCard = (title: string) => {
     setUndoState(null)
@@ -222,7 +236,9 @@ export function AppShell({ storage = indexedDbTreeStorage }: AppShellProps = {})
           onExport={exportTree}
           onImportFile={(file) => void importTree(file)}
           onReset={resetData}
+          onThemePreferenceChange={setThemePreference}
           returnFocusRef={settingsButtonRef}
+          themePreference={themePreference}
         />
       ) : null}
     </main>

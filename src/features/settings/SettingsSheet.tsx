@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, type RefObject } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { STRINGS } from '../../strings'
+import type { ThemePreference } from '../appearance/theme'
 import { useDialogClose } from '../dialog/useDialogClose'
 import styles from './SettingsSheet.module.css'
 
@@ -11,7 +12,9 @@ interface SettingsSheetProps {
   onExport: () => void
   onImportFile: (file: File) => void
   onReset: () => void
+  onThemePreferenceChange?: (preference: ThemePreference) => void
   returnFocusRef?: RefObject<HTMLElement | null>
+  themePreference?: ThemePreference
 }
 
 export function SettingsSheet({
@@ -20,7 +23,9 @@ export function SettingsSheet({
   onExport,
   onImportFile,
   onReset,
+  onThemePreferenceChange,
   returnFocusRef,
+  themePreference = 'system',
 }: SettingsSheetProps) {
   const prefersReducedMotion = useReducedMotion()
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null)
@@ -87,6 +92,23 @@ export function SettingsSheet({
 
           <p className={styles.note}>{STRINGS.exportReminder}</p>
 
+          <fieldset className={styles.appearance}>
+            <legend>{STRINGS.appearance}</legend>
+            <div className={styles.themeOptions}>
+              {THEME_OPTIONS.map((option) => (
+                <label className={styles.themeOption} key={option.value}>
+                  <input
+                    checked={themePreference === option.value}
+                    name="theme"
+                    onChange={() => onThemePreferenceChange?.(option.value)}
+                    type="radio"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           {pendingImportFile ? (
             <div className={styles.confirmPanel}>
               <p>{STRINGS.importConfirm}</p>
@@ -139,3 +161,9 @@ export function SettingsSheet({
     </AnimatePresence>
   )
 }
+
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: STRINGS.themeSystem },
+  { value: 'light', label: STRINGS.themeLight },
+  { value: 'dark', label: STRINGS.themeDark },
+]

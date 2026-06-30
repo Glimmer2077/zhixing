@@ -7,8 +7,8 @@ nested card tree. The authoritative product spec is `SPEC.md`.
 
 ## Current Milestone
 
-M5 - polish and acceptance QA in progress; safe-area, accessibility, and
-reduced-motion coverage is ready to commit.
+M5 - polish and acceptance QA in progress; appearance controls are implemented
+and ready to commit.
 
 ## Current Status
 
@@ -38,24 +38,27 @@ that browser profile.
 M5 safe-area/a11y/motion QA expands safe-area padding to fixed sheets and
 horizontal insets, adds dialog focus restoration, labels dialogs from their
 headings, and disables tap scaling when reduced motion is requested.
+M5 appearance controls add the Settings `外观` section with `跟随系统` / `浅色` /
+`深色`, persist the preference in localStorage, and apply explicit light/dark
+overrides through `html[data-theme]`.
 
 ## Verification
 
 - `./node_modules/.bin/prettier --write <changed files>` - passed.
 - `./node_modules/.bin/tsc -b --pretty false` - passed.
 - `./node_modules/.bin/eslint . --max-warnings=0` - passed.
-- `./node_modules/.bin/vitest run` - passed: 96 tests across 20 files.
-- `./node_modules/.bin/vitest run --coverage` - passed: 91.97% statements, 82.73%
-  branches, 92.2% functions, 92.33% lines.
+- `./node_modules/.bin/vitest run` - passed: 103 tests across 21 files.
+- `./node_modules/.bin/vitest run --coverage` - passed: 92.28% statements, 83.17%
+  branches, 92.63% functions, 92.61% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
-- `CI= ./node_modules/.bin/playwright test` - passed: 23 browser checks, with the
+- `CI= ./node_modules/.bin/playwright test` - passed: 25 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
 - `pnpm audit --audit-level moderate` - passed: no known vulnerabilities.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 PWA/offline QA; M5 safe-area/a11y/motion QA is
+- Git commits exist through M5 safe-area/a11y/motion QA; M5 appearance controls are
   implemented and verified for the next commit.
 
 ## Active Decisions
@@ -107,9 +110,23 @@ headings, and disables tap scaling when reduced motion is requested.
   safe-area insets.
 - Reduced-motion users keep navigation and sheet transitions at zero-duration and
   card tap scaling is disabled.
+- Theme preference key is `zhixing.theme.v1`; `system` removes `data-theme` so the
+  existing `prefers-color-scheme` CSS remains authoritative.
+- Explicit `light` and `dark` write `html[data-theme]` overrides and survive reload.
+
+## Acceptance Gaps
+
+- Reparent is currently available through the edit sheet parent selector, not by
+  dragging a card onto another card with a drop affordance.
+- Undo is currently a single delete undo toast, not full zundo-backed undo/redo for
+  every structural change.
+- Swipe-down back gesture is not implemented; back button, browser/system back, and
+  persisted path are implemented.
+- Export/import works with the v1 schema, but export filename/copy still differs
+  from the exact `SPEC.md` examples.
 
 ## Next Steps
 
-1. Commit M5 safe-area/a11y/motion QA.
-2. Decide whether appearance controls are needed before final v1 acceptance.
-3. Run final v1 acceptance pass against `SPEC.md`.
+1. Commit M5 appearance controls.
+2. Decide which acceptance gap to close next: drag-to-parent reparent, full undo/redo, swipe-down back, or export/copy polish.
+3. Run another final acceptance pass after the chosen gap is closed.

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AppShell } from './AppShell'
+import { THEME_STORAGE_KEY } from '../features/appearance/theme'
 import { PATH_STORAGE_KEY } from '../features/navigation/useNavigation'
 import { createMemoryTreeStorage } from '../features/persistence/treeStorage'
 import { exportTreeToJson } from '../features/persistence/treeTransfer'
@@ -184,5 +185,17 @@ describe('AppShell', () => {
         ),
       ).toBe(true)
     })
+  })
+
+  it('persists and applies the selected appearance preference', async () => {
+    const user = userEvent.setup()
+
+    render(<AppShell storage={createMemoryTreeStorage()} />)
+
+    await user.click(screen.getByRole('button', { name: '设置' }))
+    await user.click(screen.getByRole('radio', { name: '深色' }))
+
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark')
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
   })
 })

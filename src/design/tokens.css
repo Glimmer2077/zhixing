@@ -31,3 +31,21 @@
     --hairline: rgba(255, 255, 255, 0.12);
   }
 }
+
+:root[data-theme='light'] {
+  --canvas: #faf9f6;
+  --ink: #1a1a18;
+  --text-1: #1a1a18;
+  --text-2: #6e6e68;
+  --text-3: #a8a7a0;
+  --hairline: rgba(26, 26, 24, 0.1);
+}
+
+:root[data-theme='dark'] {
+  --canvas: #141414;
+  --ink: #eceae3;
+  --text-1: #eceae3;
+  --text-2: #a4a29b;
+  --text-3: #6f6e68;
+  --hairline: rgba(255, 255, 255, 0.12);
+}

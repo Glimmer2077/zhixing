@@ -170,6 +170,18 @@ test('honors the reduced motion preference', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '工作' })).toBeVisible()
 })
 
+test('persists the selected appearance preference', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: '设置' }).click()
+  await page.getByRole('radio', { name: '深色' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+  await page.reload()
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+})
+
 test('resets local data from settings', async ({ page }) => {
   await page.goto('/')
 

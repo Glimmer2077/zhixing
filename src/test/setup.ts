@@ -6,6 +6,7 @@ Object.defineProperty(window, 'localStorage', {
 })
 
 afterEach(() => {
+  document.documentElement.removeAttribute('data-theme')
   window.localStorage.clear()
   window.history.replaceState(null, '', '/')
 })
