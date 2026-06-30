@@ -4,7 +4,11 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const rawBase = process.env.BASE_PATH ?? '/'
+const base = rawBase === '/' ? '/' : `/${rawBase.replace(/^\/+|\/+$/g, '')}/`
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -19,7 +23,7 @@ export default defineConfig({
         theme_color: '#FAF9F6',
         icons: [
           {
-            src: '/icons/zhixing.svg',
+            src: 'icons/zhixing.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable',

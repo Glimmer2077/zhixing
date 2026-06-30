@@ -8,7 +8,7 @@
   "theme_color": "#FAF9F6",
   "icons": [
     {
-      "src": "/icons/zhixing.svg",
+      "src": "icons/zhixing.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

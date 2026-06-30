@@ -57,6 +57,9 @@ uses `导出` / `导入`, import failures show the full recovery hint, and downl
 Final acceptance documentation now records the latest verification pass in
 `docs/ACCEPTANCE.md`, and `docs/INSTALL_PHONE.md` explains the HTTPS-hosted PWA
 installation path for iPhone and Android.
+GitHub Pages deployment wiring adds `.github/workflows/deploy-pages.yml`, a
+`BASE_PATH`-driven Vite base path, and relative manifest/icon URLs so project-page
+deployments such as `https://<user>.github.io/<repo>/` can install the PWA.
 
 ## Verification
 
@@ -67,6 +70,8 @@ installation path for iPhone and Android.
 - `./node_modules/.bin/vitest run --coverage` - passed: 91.08% statements, 82.45%
   branches, 91.04% functions, 91.34% lines.
 - `./node_modules/.bin/vite build` - passed and generated PWA service worker output.
+- `env BASE_PATH=/zhixing/ ./node_modules/.bin/vite build` - passed and generated
+  project-page paths for JS, CSS, manifest, and service worker registration.
 - `CI=1 ./node_modules/.bin/playwright test` - passed: 31 browser checks, with the
   PWA request-failure reload regression still passing on Chromium and intentionally
   skipped on mobile Safari because Playwright WebKit blocks intercepted reloads.
@@ -74,8 +79,8 @@ installation path for iPhone and Android.
 - Sensitive string scan for `console.log`, `sk-`, `api_key`, and `apiKey` in
   source/config files returned no matches.
 - `curl -I http://127.0.0.1:5173/` - returned 200 OK.
-- Git commits exist through M5 export/copy polish; final acceptance and phone
-  installation docs are ready for the next commit.
+- Git commits exist through final acceptance docs; GitHub Pages deployment wiring is
+  ready for the next commit.
 
 ## Active Decisions
 
@@ -143,6 +148,10 @@ installation path for iPhone and Android.
   download format is `知行-YYYYMMDD.json`.
 - Settings action copy follows the §10 short labels `导出` and `导入`; JSON remains
   implied by the Settings context and file accept type.
+- GitHub Pages is the first deployment target. The workflow derives `BASE_PATH` from
+  the repository name for normal project pages, uses `/` for `<owner>.github.io`
+  root repositories, and allows a `PAGES_BASE_PATH` repository variable override for
+  custom-domain root deployments.
 
 ## Acceptance Gaps
 
@@ -150,5 +159,6 @@ installation path for iPhone and Android.
 
 ## Next Steps
 
-1. Commit final acceptance and phone installation docs.
-2. Decide whether to deploy the current `dist/` build to a public HTTPS host.
+1. Commit GitHub Pages deployment wiring.
+2. Push the repository to GitHub, enable Pages with GitHub Actions as the source,
+   and verify the installed PWA on a phone.

@@ -31,6 +31,30 @@ The hosted site must serve these files from the same origin:
 
 PWA installability depends on a web app manifest and, for normal devices, an HTTPS origin. `localhost` / `127.0.0.1` is only a development exception on the same machine.
 
+## Deploy With GitHub Pages
+
+This repository includes `.github/workflows/deploy-pages.yml`.
+
+1. Push the repository to GitHub.
+2. In the GitHub repository, open Settings -> Pages.
+3. Set Build and deployment -> Source to GitHub Actions.
+4. Push to `main`, or run the `Deploy GitHub Pages` workflow manually.
+5. Wait for the workflow to finish, then open the Pages URL on the phone.
+
+For a normal project page, the URL is usually:
+
+```text
+https://<user-or-org>.github.io/<repo>/
+```
+
+The workflow automatically builds Vite with `BASE_PATH=/<repo>/` for that case.
+
+For a root Pages repository named `<user-or-org>.github.io`, the workflow uses
+`BASE_PATH=/`.
+
+If the project later uses a custom domain at the site root, set a GitHub repository
+variable named `PAGES_BASE_PATH` to `/`.
+
 ## Install On iPhone
 
 1. Open the HTTPS site URL on the iPhone.
