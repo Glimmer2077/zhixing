@@ -64,6 +64,10 @@ Remote repository `https://github.com/Glimmer2077/zhixing` exists and tracks
 `origin/main`. The user later chose to make the repository public so GitHub Pages
 could be used. GitHub Pages is enabled with GitHub Actions as the build source, and
 the deployed PWA is available at `https://glimmer2077.github.io/zhixing/`.
+The user-provided root `icon.png` is now the source icon. The app publishes PNG
+icon sizes at `public/icons/zhixing-180.png`, `public/icons/zhixing-192.png`, and
+`public/icons/zhixing-512.png`, and the old SVG icon has been removed from the PWA
+manifest path.
 
 ## Verification
 
@@ -105,6 +109,15 @@ the deployed PWA is available at `https://glimmer2077.github.io/zhixing/`.
 - `curl -I https://glimmer2077.github.io/zhixing/manifest.webmanifest` - returned
   200 OK.
 - `curl -I https://glimmer2077.github.io/zhixing/sw.js` - returned 200 OK.
+- `sips -g pixelWidth -g pixelHeight icon.png` - confirmed the source icon is a
+  1024x1024 PNG.
+- Generated 180x180, 192x192, and 512x512 PNG app icons from `icon.png`.
+- `./node_modules/.bin/tsc -b --pretty false` - passed after the icon change.
+- `./node_modules/.bin/eslint . --max-warnings=0` - passed after the icon change.
+- `./node_modules/.bin/vitest run` - passed after the icon change: 117 tests across
+  25 files.
+- `env BASE_PATH=/zhixing/ ./node_modules/.bin/vite build` - passed after the icon
+  change and generated a manifest that references PNG app icons.
 
 ## Active Decisions
 
@@ -179,6 +192,8 @@ the deployed PWA is available at `https://glimmer2077.github.io/zhixing/`.
 - The source repository is public by user decision so GitHub Pages can host the PWA.
   Do not switch it back to private without also choosing a different deployment
   target or GitHub plan that supports private-repository Pages.
+- Keep root `icon.png` as the source art for generated PWA icon sizes. Deploy only
+  the derived 180, 192, and 512 PNG files under `public/icons/`.
 
 ## Acceptance Gaps
 
@@ -186,8 +201,7 @@ the deployed PWA is available at `https://glimmer2077.github.io/zhixing/`.
 
 ## Next Steps
 
-1. Commit and push the public GitHub Pages deployment status update.
-2. Open `https://glimmer2077.github.io/zhixing/` on a phone and add it to the Home
-   Screen.
-3. Verify installed PWA launch, persistence, offline shell load, and JSON export on
-   the phone.
+1. Commit and push the PNG icon update.
+2. Wait for GitHub Pages deployment to finish.
+3. Open `https://glimmer2077.github.io/zhixing/` on a phone, reinstall or refresh the
+   Home Screen app if needed, and verify the new icon.
